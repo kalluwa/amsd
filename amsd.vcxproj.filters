@@ -1,0 +1,268 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Src">
+      <UniqueIdentifier>{25cf29db-5667-4156-a344-6f91384c51c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Core">
+      <UniqueIdentifier>{e4d79d04-dea2-4c0d-a23c-665122ae9b98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Driver">
+      <UniqueIdentifier>{530c569a-db63-4361-8a63-e72ae6baf94d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="application">
+      <UniqueIdentifier>{35d336f6-de42-4044-9838-3d2d48ab84ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Scene">
+      <UniqueIdentifier>{fcd770ad-da53-4dfe-817b-ad4f911325d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Driver\interface">
+      <UniqueIdentifier>{9c675221-1be8-42c9-8cf0-bf28a8595324}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Driver\opengl">
+      <UniqueIdentifier>{e3843cc5-65e0-4a40-b606-4d816d5f3dc5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Driver\libs">
+      <UniqueIdentifier>{2c0e10c9-545b-4b17-9fc5-06e6f6db99f4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+    <None Include="res\nav_large.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\nav_large_hc.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\pages.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\pages_hc.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\pages_small.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\pages_small_hc.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\info.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\buttons.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\filelarge.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\filesmall.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\main.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\writelarge.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\writesmall.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\ribbon.mfcribbon-ms">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\amsd.rc2">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\amsdDoc.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\amsd.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\Toolbar.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\Toolbar256.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="amsd.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MainFrm.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="amsdDoc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="amsdView.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CalendarBar.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\aabbox3d.h">
+      <Filter>Src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\core.h">
+      <Filter>Src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\kkMath.h">
+      <Filter>Src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\kkString.h">
+      <Filter>Src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\line2d.h">
+      <Filter>Src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\line3d.h">
+      <Filter>Src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\matrix4.h">
+      <Filter>Src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\plane3d.h">
+      <Filter>Src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\quaternion.h">
+      <Filter>Src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\rect.h">
+      <Filter>Src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\triangle3d.h">
+      <Filter>Src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\Types.h">
+      <Filter>Src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\vector2d.h">
+      <Filter>Src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\vector3d.h">
+      <Filter>Src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="EventTypes.h">
+      <Filter>application</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\EventTypes.h">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\kkArray.h">
+      <Filter>Src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\heapsort.h">
+      <Filter>Src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="App.h">
+      <Filter>application</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Driver\IVideoDriver.h">
+      <Filter>Src\Driver\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Driver\COpenGLDriver.h">
+      <Filter>Src\Driver\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Driver\EDriverType.h">
+      <Filter>Src\Driver\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scene\COpenglVolumeTexture.h">
+      <Filter>Src\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scene\CSceneManager.h">
+      <Filter>Src\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scene\CSimpleCameraNode.h">
+      <Filter>Src\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scene\ISceneManager.h">
+      <Filter>Src\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scene\ISceneNode.h">
+      <Filter>Src\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scene\IVolumeTexture.h">
+      <Filter>Src\Scene</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="amsd.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MainFrm.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="amsdDoc.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="amsdView.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CalendarBar.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="App.cpp">
+      <Filter>application</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Driver\COpenGLDriver.cpp">
+      <Filter>Src\Driver\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Scene\COpenglVolumeTexture.cpp">
+      <Filter>Src\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Scene\CSceneManager.cpp">
+      <Filter>Src\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Scene\CSimpleCameraNode.cpp">
+      <Filter>Src\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Scene\IVolumeTexture.cpp">
+      <Filter>Src\Scene</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="amsd.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Src\Driver\glew32s.lib">
+      <Filter>Src\Driver</Filter>
+    </Library>
+    <Library Include="Src\Driver\glew32.lib">
+      <Filter>Src\Driver</Filter>
+    </Library>
+    <Library Include="Src\Driver\cgGL.lib">
+      <Filter>Src\Driver\libs</Filter>
+    </Library>
+    <Library Include="Src\Driver\cg.lib">
+      <Filter>Src\Driver\libs</Filter>
+    </Library>
+  </ItemGroup>
+</Project>
