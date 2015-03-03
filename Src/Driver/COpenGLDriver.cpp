@@ -231,6 +231,9 @@ namespace video
 		line.start = core::vector3df( (float) dX, (float) dY, (float) dZ );
 		gluUnProject (posInScreen.X, Height-posInScreen.Y, 1.0, mvmatrix, projmatrix, viewport, &dX, &dY, &dZ);
 		line.end  = core::vector3df( (float) dX, (float) dY, (float) dZ );
+
+		line.end = line.end - line.start;
+		line.end.normalize();
 		return line;
 	};
 	void COpenGLDriver::drawQuad(const core::vector2di& leftTop,const core::vector2di& bottomRight)

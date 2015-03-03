@@ -51,6 +51,7 @@ BEGIN_MESSAGE_MAP(CamsdView, CView)
 	ON_WM_MOUSEMOVE()
 	ON_WM_MOUSEWHEEL()
 	ON_WM_PAINT()
+	ON_COMMAND(ID_BUTTON2, &CamsdView::OnObjA_LengthAccuracy)
 END_MESSAGE_MAP()
 
 // CamsdView 构造/析构
@@ -492,4 +493,10 @@ void CamsdView::OnPaint()
 	RenderScene();
 	//flush
 	SwapBuffers(m_hDC);
+}
+
+//button click event
+void CamsdView::OnObjA_LengthAccuracy()
+{
+	// TODO: 在此添加命令处理程序代码
 }

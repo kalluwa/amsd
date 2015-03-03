@@ -9,7 +9,11 @@
 using namespace kk;
 //test ray
 core::line3df line;
+core::aabbox3df mainBox(-0.5f,-0.5f,-0.5f,0.5f,0.5f,0.5f);
+core::aabbox3df pickBox(-1,-1,-1,0,0,0);
+core::vector3df intersectionPoint;
 
+kk::scene::IVolumeTexture* volumeTexture;
 	IApp::IApp(kk::video::EDriverType type)
 	{
 
@@ -24,13 +28,16 @@ core::line3df line;
 
 		//add camera node
 		kk::scene::CSimpleCameraNode* simplecamera = new kk::scene::CSimpleCameraNode(driver,
-			kk::core::vector3df(0,0,-10),kk::core::vector3df(0,0,0),kk::core::vector3df(0,1,0));
+			kk::core::vector3df(0,0,5),kk::core::vector3df(0,0,0),kk::core::vector3df(0,1,0));
 		scene->addCamera(simplecamera);
 		//nodes.push_back(simplecamera);
 
 		//volume node
-		kk::scene::IVolumeTexture* volumeTexture = new kk::scene::COpenglVolumeTexture(driver,
-			"F:\\CT\\N42.45.rcn",768,656,126);
+		//<<- image is too large for my videocard-> result in showing nothing ->>
+		// 756*656*252*4bytes = 484.3125MB and my video card memory is 492MB
+		volumeTexture = new kk::scene::COpenglVolumeTexture(driver,
+			//"F:\\CT\\data\\N42.45_A.raw",640,544,260);//288 error
+			"F:\\CT\\N42.45.rcn",768,656,126);//,125);//125
 		scene->addNodeToRender(volumeTexture);
 		//set start pos
 		SEvent e;
@@ -83,11 +90,17 @@ core::line3df line;
 		glLoadIdentity();
 		gluPerspective(45,driver->getViewport().X/(float)driver->getViewport().Y,0.1f,1000.0f);
 		glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+		glColor3ub(255,0,0);
+		driver->draw3dBox(pickBox);
 		glColor3ub(255,255,0);
-		driver->draw3dBox(core::aabbox3df(0,0,0,1,1,1));
-		
-		::glColor3ub(255,0,0);
+		driver->draw3dBox(mainBox);
+		::glColor3ub(255,0,255);
 		driver->draw3dBox(core::aabbox3df(-1,-1,-1,1,1,1));
+		
+		glColor3ub(255,255,0);
+		//draw intersection point
+		driver->draw3dBox(core::aabbox3df(intersectionPoint.X-0.1f,intersectionPoint.Y-0.1f,intersectionPoint.Z-0.1f,
+			intersectionPoint.X+0.1f,intersectionPoint.Y+0.1f,intersectionPoint.Z+0.1f));
 		driver->draw3dLine(line.start,line.end);
 
 		glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
@@ -107,6 +120,18 @@ core::line3df line;
 			{
 				//test get ray
 				line = driver->getRayFromScreenPoint(core::vector2di(event.Mouse.x,event.Mouse.y));
+				//test line's intersection with box
+				if(mainBox.getIntersectionPoint(line,intersectionPoint))
+				{
+#ifdef WIN32
+					char str[100];
+					sprintf_s(str,100,"%.3f %.3f %.3f",intersectionPoint.X,intersectionPoint.Y,intersectionPoint.Z);
+					::OutputDebugStringA(str);
+#endif
+					line.start = intersectionPoint;
+					pickBox=volumeTexture->getPointedData(line);
+				}
+				
 			}
 			break;
 		case ET_USER:

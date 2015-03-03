@@ -275,6 +275,67 @@ class aabbox3d
 				(other.MaxEdge*inv) + (MaxEdge*d));
 		}
 
+		//test intersection with ray[line3d]
+		//http://www.siggraph.org/education/materials/HyperGraph/raytrace/rtinter3.htm
+		bool getIntersectionPoint(const line3d<T>& ray,vector3d<T>& intersectPoint)
+		{
+			//initilization
+			vector3d<T> direction =ray.end ;
+
+			T Infinity = 100000000;
+			T Tnear = -Infinity,Tfar = Infinity;
+			T T1,T2;
+			//for each pair of planes
+
+			//plane normal along x-axis
+			if(direction.X==0)
+			{
+				if(ray.start.X<MinEdge.X || ray.start.X>MaxEdge.X)
+					return false;//parallel to the yz plane
+			}
+			//calculate the x intersect pos
+			T1 = (MinEdge.X - ray.start.X)/direction.X;
+			T2 = (MaxEdge.X - ray.start.X)/direction.X;
+			//make sure T1 is the smaller one
+			if(T1 > T2){ f32 tmp = T1; T1 = T2; T2 = tmp; }
+			if(T1 > Tnear) Tnear = T1;
+			if(T2 < Tfar) Tfar = T2;
+			if(Tnear > Tfar || Tfar <0 ) return false;
+			
+			//plane normal along y-axis
+			if(direction.Y==0)
+			{
+				if(ray.start.Y<MinEdge.Y || ray.start.Y>MaxEdge.Y)
+					return false;//parallel to the zx plane
+			}
+			//calculate the y intersect pos
+			T1 = (MinEdge.Y - ray.start.Y)/direction.Y;
+			T2 = (MaxEdge.Y - ray.start.Y)/direction.Y;
+			//make sure T1 is the smaller one
+			if(T1 > T2){ f32 tmp = T1; T1 = T2; T2 = tmp; }
+			if(T1 > Tnear) Tnear = T1;
+			if(T2 < Tfar) Tfar = T2;
+			if(Tnear > Tfar || Tfar <0 ) return false;
+			
+			//plane normal along Z-axis
+			//Tnear = -Infinity;Tfar = Infinity;
+			if(direction.Z==0)
+			{
+				if(ray.start.Z<MinEdge.Z || ray.start.Z>MaxEdge.Z)
+					return false;//parallel to the zx plane
+			}
+			//calculate the Z intersect pos
+			T1 = (MinEdge.Z - ray.start.Z)/direction.Z;
+			T2 = (MaxEdge.Z - ray.start.Z)/direction.Z;
+			//make sure T1 is the smaller one
+			if(T1 > T2){ f32 tmp = T1; T1 = T2; T2 = tmp; }
+			if(T1 > Tnear) Tnear = T1;
+			if(T2 < Tfar) Tfar = T2;
+			if(Tnear > Tfar || Tfar <0 ) return false;
+			
+			intersectPoint = ray.start + Tnear * direction;
+			return true;
+		}
 		// member variables
 		
 		vector3d<T> MinEdge;

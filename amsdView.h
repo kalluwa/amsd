@@ -99,6 +99,7 @@ public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnPaint();
+	afx_msg void OnObjA_LengthAccuracy();
 };
 
 #ifndef _DEBUG  // amsdView.cpp 中的调试版本
