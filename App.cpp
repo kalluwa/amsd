@@ -10,6 +10,7 @@
 
 //for calculation
 #include "LengthAccuracy.h"
+#include "TrianglePathLength.h"
 
 using namespace kk;
 using namespace Calculation;
@@ -208,6 +209,18 @@ bool keyCtrl=false;
 					volumeTexture->getSelectedBoundingBox());
 				
 				Amsd_LengthAccuracy(boxData,scene);
+
+				if(boxData)
+				delete boxData;
+			}
+			break;
+		case Calculation::ECT_TRIANGLE_PATH_LENGTH:
+			{
+				Calculation::BoxData* boxData = new BoxData(volumeTexture->getVolumeData(),volumeTexture->getVolumeSizeX(),volumeTexture->getVolumeSizeY(),volumeTexture->getVolumeSizeZ(),volumeTexture->getSelectedBoundingBox());
+				TrianglePathLength(boxData,scene);
+				
+				if(boxData)
+				delete boxData;
 			}
 			break;
 		}

@@ -100,6 +100,7 @@ public:
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnPaint();
 	afx_msg void OnObjA_LengthAccuracy();
+	afx_msg void OnTrianglePathLength();
 };
 
 #ifndef _DEBUG  // amsdView.cpp 中的调试版本

@@ -54,6 +54,7 @@ BEGIN_MESSAGE_MAP(CamsdView, CView)
 	ON_WM_MOUSEWHEEL()
 	ON_WM_PAINT()
 	ON_COMMAND(ID_BUTTON2, &CamsdView::OnObjA_LengthAccuracy)
+	ON_COMMAND(ID_BUTTON3, &CamsdView::OnTrianglePathLength)
 END_MESSAGE_MAP()
 
 // CamsdView 构造/析构
@@ -507,6 +508,19 @@ void CamsdView::OnObjA_LengthAccuracy()
 	event.type = ET_USER;
 	event.UserData.type = EUT_CALCULATION;
 	event.UserData.calType = ECT_OBJ_LENGTH;//first type
+
+	app->OnEvent(event);
+	updateViewWindow();
+}
+
+
+void CamsdView::OnTrianglePathLength()
+{
+	// TODO: 在此添加命令处理程序代码
+	SEvent event;
+	event.type = ET_USER;
+	event.UserData.type = EUT_CALCULATION;
+	event.UserData.calType = ECT_TRIANGLE_PATH_LENGTH;
 
 	app->OnEvent(event);
 	updateViewWindow();

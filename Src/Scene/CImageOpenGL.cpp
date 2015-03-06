@@ -33,16 +33,50 @@ CImageOpenGL::~CImageOpenGL()
 
 void CImageOpenGL::fillData(f32*data,s32 width,s32 height,bool addEdge)
 {
+	
+
 	if(Data)
 	{
 		delete []Data;
 	}
-	Data = new f32[width*height];
-	//update Size
-	Width=width;
-	Height = height;
-	//scale image data to get a better visual
-	memcpy(Data,data,width*height*sizeof(f32));
+
+	//for 1D image
+	if(height==1)
+	{
+		height=width*2;
+		Data = new f32[width*height];
+		memset(Data,0,width*height*4);
+		//find max value
+		f32 maxValue = data[0];
+		f32 minValue = data[0];
+		for(s32 i=0;i<width;i++)
+		{
+			if(maxValue < data[i])
+				maxValue = data[i];
+			if(minValue> data[i])
+				minValue =data[i];
+		}
+		if(minValue == maxValue)
+			maxValue+=1.0f;
+		//fill image
+		for(s32 i=0;i<width;i++)
+		{
+			s32 startDrawPos = (s32)(height-height*((data[i]-minValue)/(maxValue-minValue)));
+			for(s32 j=startDrawPos;j<height;j++)
+			{
+				Data[i+j*width] = 1.0f;
+			}
+		}
+	}
+	else //2D image
+	{
+		Data = new f32[width*height];
+		//update Size
+		Width=width;
+		Height = height;
+		//scale image data to get a better visual
+		memcpy(Data,data,width*height*sizeof(f32));
+	}
 	f32 maxValue = 0.0f,minValue =1.0f;
 	for(s32 i=0;i<width*height;i++)
 	{

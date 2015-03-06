@@ -225,6 +225,9 @@
     <ClInclude Include="src\scene\CImageOpenGL.h">
       <Filter>Src\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="TrianglePathLength.h">
+      <Filter>calculation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="amsd.cpp">
@@ -274,6 +277,9 @@
     </ClCompile>
     <ClCompile Include="Src\Scene\CImageOpenGL.cpp">
       <Filter>Src\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="TrianglePathLength.cpp">
+      <Filter>calculation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

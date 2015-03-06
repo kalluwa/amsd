@@ -9,7 +9,7 @@ namespace kk
 namespace scene
 {
 
-f32 threshold=0.18f;
+f32 threshold=0.20f;
 
 COpenglVolumeTexture::COpenglVolumeTexture(video::IVideoDriver* driver)
 	:IVolumeTexture(driver),SizeX(0),SizeY(0),SizeZ(0),Data(0),DataVisited(0)

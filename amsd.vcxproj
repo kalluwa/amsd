@@ -159,6 +159,7 @@
     <ClInclude Include="Src\Scene\IVolumeTexture.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TrianglePathLength.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="amsd.cpp" />
@@ -180,6 +181,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TrianglePathLength.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="amsd.rc" />

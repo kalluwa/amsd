@@ -254,4 +254,26 @@ void BoxData::getCoronalImage(f32*& dataToFill,s32& width,s32&height) const
 	}
 };
 
+void BoxData::getCoronalImageEliminateAir(f32*& dataToFill,s32& width,s32&height,f32 threshold) const
+{
+	width = LocalSize.Z;height = LocalSize.X;
+
+	dataToFill = new f32[width*height];
+
+	f32 sum=0.0f;
+	f32 tmpValue;
+	for(int x=Box.MinEdge.X;x<=Box.MaxEdge.X;x++)//y
+	for(int z=Box.MinEdge.Z;z<=Box.MaxEdge.Z;z++)//x
+	{
+		sum = 0.0f;
+		for(int y=Box.MinEdge.Y;y<=Box.MaxEdge.Y;y++)
+		{
+			tmpValue = getValue(x,y,z);
+			if(tmpValue > threshold)
+				sum += tmpValue;
+		}
+		dataToFill[width*(x-Box.MinEdge.X)+z-Box.MinEdge.Z] =sum; 
+	}
+};
+
 }//end namespace 

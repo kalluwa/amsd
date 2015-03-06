@@ -10,7 +10,8 @@ namespace Calculation
 
 	enum ECalType
 	{
-		ECT_OBJ_LENGTH
+		ECT_OBJ_LENGTH,
+		ECT_TRIANGLE_PATH_LENGTH
 	};
 
 	class BoxData
@@ -54,7 +55,7 @@ namespace Calculation
 		void getSliceZ(f32* dataToFill,s32 sliceNo,s32& width,s32& height) const;
 
 		void getCoronalImage(f32*& dataToFill,s32& width,s32&height) const;
-
+		void getCoronalImageEliminateAir(f32*& dataToFill,s32& width,s32&height,f32 threshold) const;
 
 		BoxData& operator=(const BoxData& other)
 		{
