@@ -58,11 +58,15 @@ namespace video
 
 		virtual void draw3dLine(const vector3df& v1,const vector3df& v2);
 
+		virtual void draw3dLine(f32 x1,f32 y1,f32 z1,f32 x2,f32 y2,f32 z2);
+
 		virtual void draw3dBox(const aabbox3df& bbox);
 
 		virtual void draw3dSphere(const core::vector3df& pos,f32 radius);
 
 		virtual void drawFullScreenQuad();
+
+		virtual void drawImage(f32* imageData,s32 width,s32 height,const core::rect<s32>& rectangle);
 
 		virtual void drawQuad(const core::vector2di& leftTop,const core::vector2di& rightBottom);
 

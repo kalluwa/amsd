@@ -23,7 +23,7 @@ public:
 	COpenglVolumeTexture(video::IVideoDriver* driver,int sizeX,int sizeY,int sizeZ);
 
 //create a volumeTexture from file
-	COpenglVolumeTexture(video::IVideoDriver* driver,const char* fileName,int sizeX,int sizeY,int sizeZ,int startSlice = 0);
+	COpenglVolumeTexture(video::IVideoDriver* driver,const char* fileName,int sizeX,int sizeY,int sizeZ,f32 mmInX,f32 mmInY,f32 mmInZ,int startSlice = 0);
 //deconstructor
 	virtual ~COpenglVolumeTexture();
 //load volume 
@@ -33,7 +33,19 @@ public:
 //render
 	virtual void render();
 //get pointed data
-	virtual core::aabbox3df getPointedData(const core::line3df& ray);
+	virtual core::aabbox3df getPointedData(const core::line3df& ray,bool appendBox);
+//get volume data
+	virtual f32* getVolumeData();
+//get volume size
+	virtual s32 getVolumeSizeX(){return SizeX;};
+	virtual s32 getVolumeSizeY(){return SizeY;};
+	virtual s32 getVolumeSizeZ(){return SizeZ;};
+//get scale
+	virtual f32 getMilimeterInX(){ return mmInX;};
+	virtual f32 getMilimeterInY(){ return mmInY;};
+	virtual f32 getMilimeterInZ(){ return mmInZ;};
+//get selected bounding box
+	virtual core::aabbox3di getSelectedBoundingBox(){ return SelectedBox; };
 
 	virtual void getNeighborData(s32 ix,s32 iy,s32 iz,s32& minX,s32& minY,s32& minZ,s32& maxX,s32& maxY,s32& maxZ);
 
@@ -58,7 +70,10 @@ private:
 	bool*DataVisited;
 	//volume size
 	s32 SizeX,SizeY,SizeZ;
+	//selected bounding box
+	core::aabbox3di SelectedBox;
 	//volume texture handle
+	f32 mmInX,mmInY,mmInZ;
 
 	CGprogram vs_main,ps_main;
 	unsigned int volumeTexture;

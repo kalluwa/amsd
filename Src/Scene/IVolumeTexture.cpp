@@ -12,6 +12,7 @@ IVolumeTexture::IVolumeTexture(video::IVideoDriver* driver)
 :ISceneNode(driver)
 {
 	Driver = driver;
+	setDebugName("IVolumeTexture");
 };
 
 }

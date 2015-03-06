@@ -167,8 +167,8 @@ public:
 	//! Clears the array and deletes all allocated memory.
 	void clear()
 	{
-		for (u32 i=0; i<used; ++i)
-			allocator.destruct(&data[i]);
+		//for (u32 i=0; i<used; ++i)
+		//allocator.destruct(&data[i]);
 
 		delete [] data;
 		data = 0;

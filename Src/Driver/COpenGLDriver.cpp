@@ -107,14 +107,63 @@ namespace video
 		glEnd();
 	};
 
+	void COpenGLDriver::draw3dLine(f32 x1,f32 y1,f32 z1,f32 x2,f32 y2,f32 z2)
+	{
+		glBegin(GL_LINES);
+		glVertex3f(x1,y1,z1);
+		glVertex3f(x2,y2,z2);
+		glEnd();
+	}
+
 	void COpenGLDriver::draw3dBox(const aabbox3df& bbox)
 	{
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
-		core::vector3df offset = (bbox.MaxEdge + bbox.MinEdge)*0.5f;
-		core::vector3df size =  (bbox.MaxEdge - bbox.MinEdge);
-		glTranslatef(offset.X,offset.Y,offset.Z);
-		::auxSolidBox(size.X,size.Y,size.Z);
+		//aux leads to memory leaks
+		//auxSolidBox(size.X,size.Y,size.Z);
+		glBegin(GL_LINES);
+
+		//lines from min corner
+		glVertex3f(bbox.MinEdge.X,bbox.MinEdge.Y,bbox.MinEdge.Z);
+		glVertex3f(bbox.MaxEdge.X,bbox.MinEdge.Y,bbox.MinEdge.Z);
+
+		glVertex3f(bbox.MinEdge.X,bbox.MinEdge.Y,bbox.MinEdge.Z);
+		glVertex3f(bbox.MinEdge.X,bbox.MaxEdge.Y,bbox.MinEdge.Z);
+
+		glVertex3f(bbox.MinEdge.X,bbox.MinEdge.Y,bbox.MinEdge.Z);
+		glVertex3f(bbox.MinEdge.X,bbox.MinEdge.Y,bbox.MaxEdge.Z);
+		
+		//lines from max corner
+		glVertex3f(bbox.MaxEdge.X,bbox.MaxEdge.Y,bbox.MaxEdge.Z);
+		glVertex3f(bbox.MinEdge.X,bbox.MaxEdge.Y,bbox.MaxEdge.Z);
+
+		glVertex3f(bbox.MaxEdge.X,bbox.MaxEdge.Y,bbox.MaxEdge.Z);
+		glVertex3f(bbox.MaxEdge.X,bbox.MinEdge.Y,bbox.MaxEdge.Z);
+
+		glVertex3f(bbox.MaxEdge.X,bbox.MaxEdge.Y,bbox.MaxEdge.Z);
+		glVertex3f(bbox.MaxEdge.X,bbox.MaxEdge.Y,bbox.MinEdge.Z);
+
+		//others 1
+		glVertex3f(bbox.MaxEdge.X,bbox.MaxEdge.Y,bbox.MinEdge.Z);
+		glVertex3f(bbox.MaxEdge.X,bbox.MinEdge.Y,bbox.MinEdge.Z);
+
+		glVertex3f(bbox.MaxEdge.X,bbox.MinEdge.Y,bbox.MaxEdge.Z);
+		glVertex3f(bbox.MaxEdge.X,bbox.MinEdge.Y,bbox.MinEdge.Z);
+
+		glVertex3f(bbox.MaxEdge.X,bbox.MinEdge.Y,bbox.MaxEdge.Z);
+		glVertex3f(bbox.MinEdge.X,bbox.MinEdge.Y,bbox.MaxEdge.Z);
+
+		//others 2
+		glVertex3f(bbox.MinEdge.X,bbox.MaxEdge.Y,bbox.MaxEdge.Z);
+		glVertex3f(bbox.MinEdge.X,bbox.MinEdge.Y,bbox.MaxEdge.Z);
+
+		glVertex3f(bbox.MinEdge.X,bbox.MaxEdge.Y,bbox.MaxEdge.Z);
+		glVertex3f(bbox.MinEdge.X,bbox.MaxEdge.Y,bbox.MinEdge.Z);
+
+		glVertex3f(bbox.MaxEdge.X,bbox.MaxEdge.Y,bbox.MinEdge.Z);
+		glVertex3f(bbox.MinEdge.X,bbox.MaxEdge.Y,bbox.MinEdge.Z);
+
+		glEnd();
 		glPopMatrix();
 	};
 
@@ -124,9 +173,101 @@ namespace video
 		glPushMatrix();
 		glTranslatef(pos.X,pos.Y,pos.Z);
 		glColor3ub(255,0,0);
-		::auxSolidSphere(radius);
+		//aux leads to memory leaks
+		//::auxSolidSphere(radius);
+		f32 alpha=0.0f,delta = 0.0f;
+		f32 pi2=2*3.1415f;
+		f32 pi=3.1415f;
+		f32 piover2 = 1.5708f;
+		f32 step = pi/8;
+		glBegin(GL_LINES);
+		for(alpha=step;alpha<pi2;alpha+=step)
+		{
+			
+			glVertex3f(0,radius,0);
+			for(delta =step;delta<pi+2*step;delta+=step)
+			{
+				f32 y = radius* cosf(delta);
+				f32 x = radius*sinf(delta)*cosf(alpha);
+				f32 z = radius*sinf(delta)*sinf(alpha);
+
+				f32 y2 = radius* cosf(delta);
+				f32 x2 = radius*sinf(delta)*cosf(alpha+step);
+				f32 z2 = radius*sinf(delta)*sinf(alpha+step);
+
+				glVertex3f(x,y,z);
+
+				glVertex3f(x,y,z);
+				glVertex3f(x2,y2,z2);
+
+				glVertex3f(x,y,z);
+			}
+			glVertex3f(0,-radius,0);
+		}
+
+		
+		glEnd();
 		glPopMatrix();
 	}
+	u32 tmpTexture=-1;
+	void COpenGLDriver::drawImage(f32* imageData,s32 width,s32 height,const core::rect<s32>& rectangle)
+	{
+		glColor3ub(255,255,255);
+		//generate texture
+		if(tmpTexture==-1)
+		{
+			glGenTextures(1, &tmpTexture);					// 创建纹理
+			// 使用来自位图数据生成 的典型纹理
+			glBindTexture(GL_TEXTURE_2D, tmpTexture);
+			// 生成纹理
+			glTexImage2D(GL_TEXTURE_2D, 0, 3, width, height, 0, GL_LUMINANCE, GL_FLOAT, imageData);
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	// 线形滤波
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	// 线形滤波
+		}
+		//绑定纹理
+		glEnable(GL_TEXTURE_2D); 
+		glBindTexture(GL_TEXTURE_2D, tmpTexture);
+		core::vector2df left_top(rectangle.UpperLeftCorner.X/(f32)Width,rectangle.UpperLeftCorner.Y/(f32)Height);
+		core::vector2df bottom_right(rectangle.LowerRightCorner.X/(f32)Width,rectangle.LowerRightCorner.Y/(f32)Height); 
+		left_top.X = 2*left_top.X-1;
+		bottom_right.X = 2*bottom_right.X-1;
+
+		left_top.Y = -2*left_top.Y+1;
+		bottom_right.Y = -2*bottom_right.Y+1;
+
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+		
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		glDisable(GL_DEPTH_TEST);
+		glBegin(GL_QUADS);
+   
+		//0,0
+		glTexCoord2f(0.0,0.0); 
+		glVertex2f(left_top.X,left_top.Y);
+		
+		//1,0
+		glTexCoord2f(1.0f,0.0f); 
+		glVertex2f(bottom_right.X,left_top.Y);
+		//1,1
+		glTexCoord2f(1.0f,1.0f); 
+		glVertex2f(bottom_right.X, bottom_right.Y);
+		//0,1
+		glTexCoord2f(0.0f,1.0f); 
+		glVertex2f(left_top.X, bottom_right.Y);
+
+		glEnd();
+		glEnable(GL_DEPTH_TEST);
+
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
+		glPopMatrix();
+		glDisable(GL_TEXTURE_2D); 
+	};
+
 	void COpenGLDriver::present()
 	{
 		glFlush();
@@ -238,8 +379,64 @@ namespace video
 	};
 	void COpenGLDriver::drawQuad(const core::vector2di& leftTop,const core::vector2di& bottomRight)
 	{
+		core::vector2df left_top(leftTop.X/(f32)Width,leftTop.Y/(f32)Height); 
+ 		core::vector2df bottom_right((leftTop.X+bottomRight.X)/(f32)Width,bottomRight.Y/(f32)Height);  
+ 		
+		left_top.X = 2*left_top.X-1;
+		bottom_right.X = 2*bottom_right.X-1;
+
+		left_top.Y = -2*left_top.Y+1;
+		bottom_right.Y = -2*bottom_right.Y+1;
+		glEnable(GL_TEXTURE_2D);
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+		
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+
+		glDisable(GL_DEPTH_TEST); 
+ 		glBegin(GL_QUADS); 
+     
+ 		//0,0 
+ 		glTexCoord2f(0,0);  
+ 		glVertex2f(left_top.X,left_top.Y); 
+ 		 
+ 		//1,0 
+ 		glTexCoord2f(1,0);  
+ 		glVertex2f(bottom_right.X,left_top.Y); 
+ 		//1,1 
+ 		glTexCoord2f(1,1);  
+ 		glVertex2f(bottom_right.X, bottom_right.Y); 
+ 		//0,1 
+ 		glTexCoord2f(0,1);  
+ 		glVertex2f(left_top.X, bottom_right.Y); 
+ 
+
+ 		glEnd(); 
+ 		glEnable(GL_DEPTH_TEST); 
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
+		glPopMatrix();
+		glDisable(GL_TEXTURE_2D);
+		/*
 		core::vector2df left_top(leftTop.X/(f32)Width,leftTop.Y/(f32)Height);
 		core::vector2df bottom_right(bottomRight.X/(f32)Width,bottomRight.Y/(f32)Height); 
+		left_top.X = 2*left_top.X-1;
+		bottom_right.X = 2*bottom_right.X-1;
+
+		left_top.Y = -2*left_top.Y+1;
+		bottom_right.Y = -2*bottom_right.Y+1;
+
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+		//glTranslatef(-1.0f,1.0f,0.0f);
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		//glColor3ub(255,255,255);
 		glDisable(GL_DEPTH_TEST);
 		glBegin(GL_QUADS);
    
@@ -259,6 +456,10 @@ namespace video
 
 		glEnd();
 		glEnable(GL_DEPTH_TEST);
+
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
+		glPopMatrix();*/
 	};
 	//############################################################
 	IVideoDriver* createOpenGLDriver(int width,int height)

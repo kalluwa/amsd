@@ -30,7 +30,21 @@ public:
 //render volume data to screen
 	//virtual void render()=0;
 //get pointed data
-	virtual core::aabbox3df getPointedData(const core::line3df& ray)=0;
+	virtual core::aabbox3df getPointedData(const core::line3df& ray,bool appendBox=false)=0;
+
+	virtual f32* getVolumeData()=0;
+
+//get volume real size
+	virtual s32 getVolumeSizeX()=0;
+	virtual s32 getVolumeSizeY()=0;
+	virtual s32 getVolumeSizeZ()=0;
+//get scale
+	virtual f32 getMilimeterInX()=0;
+	virtual f32 getMilimeterInY()=0;
+	virtual f32 getMilimeterInZ()=0;
+//get last pointed box
+	virtual core::aabbox3di getSelectedBoundingBox()=0;
+
 };
 
 }

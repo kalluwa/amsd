@@ -30,6 +30,8 @@ public:
 	virtual void onEvent(SEvent event);
 //get camera
 	virtual CSimpleCameraNode* getActiveCamera();
+//get node
+	virtual kk::scene::ISceneNode* getSpecificNodeById(core::stringc name);
 private:
 	//variables
 	core::array<ISceneNode*> Nodes;

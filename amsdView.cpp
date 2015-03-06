@@ -27,6 +27,8 @@
 #endif
 
 #include "Src/EventTypes.h"
+#include "calcHelper.h"
+using namespace Calculation;
 // CamsdView
 
 IMPLEMENT_DYNCREATE(CamsdView, CView)
@@ -68,8 +70,8 @@ CamsdView::CamsdView()
 
 CamsdView::~CamsdView()
 {
-	if(app)
-	delete  app;
+	//if(app)
+	//delete  app;
 }
 
 BOOL CamsdView::PreCreateWindow(CREATESTRUCT& cs)
@@ -214,6 +216,8 @@ int CamsdView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CView::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
+	//memory leaks
+	//_CrtSetBreakAlloc(25792);//489为内存泄露块
 	// TODO:  在此添加您专用的创建代码
 	glInit();
 	app = new IApp();
@@ -292,7 +296,7 @@ void CamsdView::OnDestroy()
 {
 	this->glRelease();
 	CView::OnDestroy();
-
+	delete app;
 	// TODO: 在此处添加消息处理程序代码
 }
 
@@ -328,7 +332,7 @@ void CamsdView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		keyShift = true;
 	event.Key.shift = keyShift;
 	//ignore the case that we pressed control and shit
-	if((nChar!=17)&&(nChar!=16))
+	//if((nChar!=17)&&(nChar!=16))
 	app->OnEvent(event);
 	/*char tmp[20];
 	sprintf(tmp,"ctrl=%2d shift=%2d",event.Key.control,event.Key.shift);
@@ -499,4 +503,11 @@ void CamsdView::OnPaint()
 void CamsdView::OnObjA_LengthAccuracy()
 {
 	// TODO: 在此添加命令处理程序代码
+	SEvent event;
+	event.type = ET_USER;
+	event.UserData.type = EUT_CALCULATION;
+	event.UserData.calType = ECT_OBJ_LENGTH;//first type
+
+	app->OnEvent(event);
+	updateViewWindow();
 }

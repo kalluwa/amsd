@@ -6,15 +6,26 @@
 #include "Src/Core/core.h"
 #include "Src/EventTypes.h"
 #include "Src/Scene/COpenglVolumeTexture.h"
+#include "Src/Scene/ImageBatches.h"
+
+//for calculation
+#include "LengthAccuracy.h"
+
 using namespace kk;
+using namespace Calculation;
+
 //test ray
 core::line3df line;
 core::aabbox3df mainBox(-0.5f,-0.5f,-0.5f,0.5f,0.5f,0.5f);
 core::aabbox3df pickBox(-1,-1,-1,0,0,0);
 core::vector3df intersectionPoint;
 
-kk::scene::IVolumeTexture* volumeTexture;
+kk::scene::IVolumeTexture* volumeTexture;	
+f32* img=0;
+bool keyCtrl=false;
+
 	IApp::IApp(kk::video::EDriverType type)
+		:driver(0),scene(0)
 	{
 
 		switch(type)
@@ -28,7 +39,7 @@ kk::scene::IVolumeTexture* volumeTexture;
 
 		//add camera node
 		kk::scene::CSimpleCameraNode* simplecamera = new kk::scene::CSimpleCameraNode(driver,
-			kk::core::vector3df(0,0,5),kk::core::vector3df(0,0,0),kk::core::vector3df(0,1,0));
+			kk::core::vector3df(0,0,3),kk::core::vector3df(0,0,0),kk::core::vector3df(0,1,0));
 		scene->addCamera(simplecamera);
 		//nodes.push_back(simplecamera);
 
@@ -36,9 +47,31 @@ kk::scene::IVolumeTexture* volumeTexture;
 		//<<- image is too large for my videocard-> result in showing nothing ->>
 		// 756*656*252*4bytes = 484.3125MB and my video card memory is 492MB
 		volumeTexture = new kk::scene::COpenglVolumeTexture(driver,
-			//"F:\\CT\\data\\N42.45_A.raw",640,544,260);//288 error
-			"F:\\CT\\N42.45.rcn",768,656,126);//,125);//125
+			//"F:\\CT\\data\\N42.45_A.raw",640,544,240,1.2f,1.2f,3.333f);//288 error
+			"F:\\CT\\N42.45.rcn",768,656,126,1.35f,1.35f,6.67f);//,125);//125
 		scene->addNodeToRender(volumeTexture);
+
+		scene::ImageBatches* batches = new scene::ImageBatches(driver);
+		scene->addNodeToRender(batches);
+		img = new f32[100*100];
+		s32 k=0;
+		for(s32 i=0;i<100;i++)
+		{
+			for(s32 j=0;j<100;j++)
+			{
+				//img[k++] = rand()/(float)RAND_MAX;
+				if(j<50&&i<50)
+					img[i*100+j]=1.0f;
+				else
+					img[i*100+j]=0.5f;
+				//img[k++]=1.0f;
+			}
+		}
+
+		//kk::scene::CImageOpenGL* imgToAdd = new kk::scene::CImageOpenGL(img,100,100);
+        //batches->addImage(imgToAdd,core::rect<s32>(0,0,100,100));
+		//kk::scene::CImageOpenGL* imgToAdd2 = new kk::scene::CImageOpenGL(img,100,100);
+		//batches->addImage(imgToAdd2,core::rect<s32>(100,0,100,100));
 		//set start pos
 		SEvent e;
 		e.type= ET_USER;
@@ -62,8 +95,9 @@ kk::scene::IVolumeTexture* volumeTexture;
 			delete scene;
 			scene = 0;
 		}
+		if(img)
+			delete []img;
 	}
-
 	void IApp::init()
 	{
 		scene = new kk::scene::CSceneManager();
@@ -76,7 +110,7 @@ kk::scene::IVolumeTexture* volumeTexture;
 	void IApp::update()
 	{
 	}
-
+	
 	//render
 	void IApp::draw()
 	{
@@ -90,20 +124,23 @@ kk::scene::IVolumeTexture* volumeTexture;
 		glLoadIdentity();
 		gluPerspective(45,driver->getViewport().X/(float)driver->getViewport().Y,0.1f,1000.0f);
 		glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+		
 		glColor3ub(255,0,0);
 		driver->draw3dBox(pickBox);
 		glColor3ub(255,255,0);
 		driver->draw3dBox(mainBox);
 		::glColor3ub(255,0,255);
 		driver->draw3dBox(core::aabbox3df(-1,-1,-1,1,1,1));
-		
+		//
 		glColor3ub(255,255,0);
 		//draw intersection point
 		driver->draw3dBox(core::aabbox3df(intersectionPoint.X-0.1f,intersectionPoint.Y-0.1f,intersectionPoint.Z-0.1f,
 			intersectionPoint.X+0.1f,intersectionPoint.Y+0.1f,intersectionPoint.Z+0.1f));
 		driver->draw3dLine(line.start,line.end);
-
+		
+		//driver->drawQuad(core::vector2di(0,0),core::vector2di(100,100));
 		glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+		//driver->drawImage(img,100,100,core::rect<s32>(0,0,100,100));
 
 	}
 
@@ -114,6 +151,7 @@ kk::scene::IVolumeTexture* volumeTexture;
 		switch(event.type)
 		{
 		case ET_KEY:
+			keyCtrl = event.Key.control;
 			break;
 		case ET_MOUSE:
 			if(event.Mouse.mouseaction == EMT_MIDDLE_DOWN)
@@ -129,7 +167,14 @@ kk::scene::IVolumeTexture* volumeTexture;
 					::OutputDebugStringA(str);
 #endif
 					line.start = intersectionPoint;
-					pickBox=volumeTexture->getPointedData(line);
+					//add box
+					if(keyCtrl)
+					{
+						pickBox.addInternalBox(volumeTexture->getPointedData(line,true));
+						//update volume selected box
+					}
+					else
+						pickBox = volumeTexture->getPointedData(line);
 				}
 				
 			}
@@ -140,8 +185,32 @@ kk::scene::IVolumeTexture* volumeTexture;
 			case EUT_RESIZE:
 				driver->setViewport(event.UserData.Size.width,event.UserData.Size.height);
 				break;
+			case EUT_CALCULATION:
+				runCalculation(event.UserData.calType);
+				break;
 			}
 			break;
 		}
 		scene->onEvent(event);
+	}
+
+	void IApp::runCalculation(Calculation::ECalType type)
+	{
+		kk::scene::ImageBatches* batches = dynamic_cast<kk::scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
+		batches->clearAllTextures();
+
+		switch(type)
+		{
+		case Calculation::ECT_OBJ_LENGTH:
+			{
+				Calculation::BoxData* boxData =new BoxData(volumeTexture->getVolumeData(),volumeTexture->getVolumeSizeX(),
+					volumeTexture->getVolumeSizeY(),volumeTexture->getVolumeSizeZ(),
+					volumeTexture->getSelectedBoundingBox());
+				
+				Amsd_LengthAccuracy(boxData,scene);
+			}
+			break;
+		}
+
+
 	}

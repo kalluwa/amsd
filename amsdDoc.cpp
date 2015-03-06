@@ -32,6 +32,7 @@
 IMPLEMENT_DYNCREATE(CamsdDoc, CDocument)
 
 BEGIN_MESSAGE_MAP(CamsdDoc, CDocument)
+	
 END_MESSAGE_MAP()
 
 
@@ -145,3 +146,4 @@ void CamsdDoc::Dump(CDumpContext& dc) const
 
 
 // CamsdDoc √¸¡Ó
+

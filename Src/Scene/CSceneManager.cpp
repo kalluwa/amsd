@@ -16,8 +16,10 @@ CSceneManager::CSceneManager()
 //deconstructor
 CSceneManager::~CSceneManager()
 {
-	for(s32 i =Nodes.size()-1 ;i>=0;i--)
+	s32 lastIndex = Nodes.size()-1;
+	for(s32 i =lastIndex ;i>=0;i--)
 	{
+		if(Nodes[i])
 		delete Nodes[i];
 	}
 };
@@ -93,5 +95,15 @@ void CSceneManager::addCamera(CSimpleCameraNode* camera)
 	addNodeToRender(camera);
 }
 
+kk::scene::ISceneNode* CSceneManager::getSpecificNodeById(core::stringc name)
+{
+	for(s32 i=0;i<(s32)Nodes.size();i++)
+	{
+		if(name == Nodes[i]->getDebugName())
+			return Nodes[i];
+	}
+
+	return 0;
+}
 }
 }

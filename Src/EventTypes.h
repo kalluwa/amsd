@@ -6,6 +6,8 @@
 
 //memset
 #include "Core/kkString.h"
+#include "../calcHelper.h"
+
 //main event type
 enum EventType
 {
@@ -36,7 +38,9 @@ enum EMouseType
 //user event
 enum EUserType
 {
-	EUT_RESIZE
+	EUT_RESIZE,
+	//calculation
+	EUT_CALCULATION
 };
 struct SEvent
 {
@@ -68,10 +72,14 @@ struct SEvent
 			EUserType type;
 			union
 			{
+				//for resize event
 				struct
 				{
 					int width,height;
 				}Size;
+
+				//for calculation event
+				Calculation::ECalType calType;
 			};
 		}UserData;
 

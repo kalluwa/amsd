@@ -39,6 +39,8 @@ public:
 	virtual void onEvent(SEvent event)=0;
 //get camera
 	virtual kk::scene::CSimpleCameraNode* getActiveCamera()=0;
+//get specific node
+	virtual kk::scene::ISceneNode* getSpecificNodeById(core::stringc name)=0;
 };
 
 }

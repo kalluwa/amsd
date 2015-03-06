@@ -13,6 +13,7 @@
 #include "Src/Driver/EDriverType.h"
 #include "Src/Scene/CSimpleCameraNode.h"
 #include "Src/Scene/CSceneManager.h"
+#include "calcHelper.h"
 
 class IApp
 {
@@ -29,6 +30,8 @@ public:
 	virtual void init();
 	//render
 	virtual void draw();
+
+	virtual void runCalculation(Calculation::ECalType type);
 
 	//dispatch event
 	virtual void OnEvent(SEvent event);

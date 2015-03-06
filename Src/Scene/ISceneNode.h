@@ -32,6 +32,11 @@ namespace scene
 		{
 			debugName = core::stringc(name);
 		}
+
+		core::stringc getDebugName()
+		{
+			return debugName;
+		}
 		virtual ~ISceneNode(){};
 
 		virtual void OnEvent(SEvent event)=0;

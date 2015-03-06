@@ -122,8 +122,10 @@
     <ClInclude Include="amsdDoc.h" />
     <ClInclude Include="amsdView.h" />
     <ClInclude Include="App.h" />
+    <ClInclude Include="calcHelper.h" />
     <ClInclude Include="CalendarBar.h" />
     <ClInclude Include="EventTypes.h" />
+    <ClInclude Include="LengthAccuracy.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Src\Core\aabbox3d.h" />
@@ -146,9 +148,12 @@
     <ClInclude Include="Src\Driver\EDriverType.h" />
     <ClInclude Include="Src\Driver\IVideoDriver.h" />
     <ClInclude Include="Src\EventTypes.h" />
+    <ClInclude Include="src\scene\CImageOpenGL.h" />
     <ClInclude Include="Src\Scene\COpenglVolumeTexture.h" />
     <ClInclude Include="Src\Scene\CSceneManager.h" />
     <ClInclude Include="Src\Scene\CSimpleCameraNode.h" />
+    <ClInclude Include="Src\Scene\IImage.h" />
+    <ClInclude Include="Src\Scene\ImageBatches.h" />
     <ClInclude Include="Src\Scene\ISceneManager.h" />
     <ClInclude Include="Src\Scene\ISceneNode.h" />
     <ClInclude Include="Src\Scene\IVolumeTexture.h" />
@@ -160,12 +165,16 @@
     <ClCompile Include="amsdDoc.cpp" />
     <ClCompile Include="amsdView.cpp" />
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="calcHelper.cpp" />
     <ClCompile Include="CalendarBar.cpp" />
+    <ClCompile Include="LengthAccuracy.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="Src\Driver\COpenGLDriver.cpp" />
+    <ClCompile Include="Src\Scene\CImageOpenGL.cpp" />
     <ClCompile Include="Src\Scene\COpenglVolumeTexture.cpp" />
     <ClCompile Include="Src\Scene\CSceneManager.cpp" />
     <ClCompile Include="Src\Scene\CSimpleCameraNode.cpp" />
+    <ClCompile Include="Src\Scene\ImageBatches.cpp" />
     <ClCompile Include="Src\Scene\IVolumeTexture.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

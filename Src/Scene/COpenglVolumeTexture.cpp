@@ -9,23 +9,28 @@ namespace kk
 namespace scene
 {
 
-f32 threshold=0.2f;
+f32 threshold=0.18f;
 
 COpenglVolumeTexture::COpenglVolumeTexture(video::IVideoDriver* driver)
 	:IVolumeTexture(driver),SizeX(0),SizeY(0),SizeZ(0),Data(0),DataVisited(0)
 {
-
+	SelectedBox.MinEdge = core::vector3di(0,0,0);
+	SelectedBox.MaxEdge = core::vector3di(0,0,0);
 }
 
 COpenglVolumeTexture::COpenglVolumeTexture(video::IVideoDriver* driver,int _sizeX,int _sizeY,int _sizeZ)
 	:IVolumeTexture(driver),SizeX(_sizeX),SizeY(_sizeY),SizeZ(_sizeZ),Data(0),DataVisited(0)
 {
-
+	SelectedBox.MinEdge = core::vector3di(0,0,0);
+	SelectedBox.MaxEdge = core::vector3di(_sizeX-1,_sizeY-1,_sizeZ-1);
 }
 
-COpenglVolumeTexture::COpenglVolumeTexture(video::IVideoDriver* driver,const char* fileName,int sizeX,int sizeY,int sizeZ,int startSlice)
-	:IVolumeTexture(driver),SizeX(sizeX),SizeY(sizeY),SizeZ(sizeZ),Data(0),DataVisited(0)
+COpenglVolumeTexture::COpenglVolumeTexture(video::IVideoDriver* driver,const char* fileName,int sizeX,int sizeY,int sizeZ,f32 mminx,f32 mminy,f32 mminz,int startSlice)
+	:IVolumeTexture(driver),SizeX(sizeX),SizeY(sizeY),SizeZ(sizeZ),mmInX(mminx),mmInY(mmInY),mmInZ(mminz),Data(0),DataVisited(0)
 {
+	SelectedBox.MinEdge = core::vector3di(0,0,0);
+	SelectedBox.MaxEdge = core::vector3di(sizeX-1,sizeY-1,sizeZ-1);
+
 	if(strlen(fileName)>0)
 		this->loadVolumeFromFile(fileName,sizeX,sizeY,sizeZ,startSlice);
 }
@@ -329,7 +334,7 @@ void COpenglVolumeTexture::OnEvent(SEvent event)
 
 
 int count =0;
-core::aabbox3df COpenglVolumeTexture::getPointedData(const core::line3df& line)
+core::aabbox3df COpenglVolumeTexture::getPointedData(const core::line3df& line,bool appendBox)
 {
 	core::aabbox3df box;
 
@@ -386,6 +391,17 @@ core::aabbox3df COpenglVolumeTexture::getPointedData(const core::line3df& line)
 	//use queue
 	getNeighborData2((s32)ray.start.X,(s32)ray.start.Y,(s32)ray.start.Z,minX,minY,minZ,maxX,maxY,maxZ);
 #endif
+	//store last pointed box
+	if(appendBox)
+	{
+		SelectedBox.addInternalPoint(core::vector3di(minX,minY,minZ));
+		SelectedBox.addInternalPoint(core::vector3di(maxX,maxY,maxZ));
+	}
+	else
+	{
+		SelectedBox.MinEdge = core::vector3di(minX,minY,minZ);
+		SelectedBox.MaxEdge = core::vector3di(maxX,maxY,maxZ);
+	}
 
 	box.MinEdge = core::vector3df(minX/(f32)SizeX,minY/(f32)SizeY,minZ/(f32)SizeZ) + core::vector3df(-0.5f,-0.5f,-0.5f);
 	box.MaxEdge = core::vector3df(maxX/(f32)SizeX,maxY/(f32)SizeY,maxZ/(f32)SizeZ) + core::vector3df(-0.5f,-0.5f,-0.5f);
@@ -572,5 +588,11 @@ void COpenglVolumeTexture::getNeighborData2(s32 ix,s32 iy,s32 iz,s32& minX,s32& 
 	while(!voxelsToBeProcessed.empty())
 		voxelsToBeProcessed.pop();
 };
+
+f32* COpenglVolumeTexture::getVolumeData()
+{
+	return Data;
+}
+
 }//end namespace scene
 }//end namespace kk

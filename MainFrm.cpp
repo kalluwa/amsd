@@ -40,6 +40,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CMainFrame::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CMainFrame::OnFilePrintPreview)
 	ON_UPDATE_COMMAND_UI(ID_FILE_PRINT_PREVIEW, &CMainFrame::OnUpdateFilePrintPreview)
+	ON_COMMAND(ID_BUTTON7, &CMainFrame::OnMinimizeRibbon)
 END_MESSAGE_MAP()
 
 // CMainFrame 构造/析构
@@ -346,4 +347,11 @@ void CMainFrame::OnFilePrintPreview()
 void CMainFrame::OnUpdateFilePrintPreview(CCmdUI* pCmdUI)
 {
 	pCmdUI->SetCheck(IsPrintPreview());
+}
+
+
+void CMainFrame::OnMinimizeRibbon()
+{
+	// TODO: 在此添加命令处理程序代码
+	m_wndRibbonBar.ToggleMimimizeState();
 }

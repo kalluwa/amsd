@@ -37,6 +37,9 @@
     <Filter Include="Src\Driver\libs">
       <UniqueIdentifier>{2c0e10c9-545b-4b17-9fc5-06e6f6db99f4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="calculation">
+      <UniqueIdentifier>{fd07f360-0d7e-4769-b6e0-1707131f0607}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -207,6 +210,21 @@
     <ClInclude Include="Src\Scene\IVolumeTexture.h">
       <Filter>Src\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="calcHelper.h">
+      <Filter>calculation</Filter>
+    </ClInclude>
+    <ClInclude Include="LengthAccuracy.h">
+      <Filter>calculation</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scene\ImageBatches.h">
+      <Filter>Src\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scene\IImage.h">
+      <Filter>Src\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\CImageOpenGL.h">
+      <Filter>Src\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="amsd.cpp">
@@ -243,6 +261,18 @@
       <Filter>Src\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Src\Scene\IVolumeTexture.cpp">
+      <Filter>Src\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="calcHelper.cpp">
+      <Filter>calculation</Filter>
+    </ClCompile>
+    <ClCompile Include="LengthAccuracy.cpp">
+      <Filter>calculation</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Scene\ImageBatches.cpp">
+      <Filter>Src\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Scene\CImageOpenGL.cpp">
       <Filter>Src\Scene</Filter>
     </ClCompile>
   </ItemGroup>
