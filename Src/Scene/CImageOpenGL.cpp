@@ -16,10 +16,10 @@ CImageOpenGL::CImageOpenGL()
 	:Width(0),Height(0),Data(0)
 {
 }
-CImageOpenGL::CImageOpenGL(f32*data,s32 width,s32 height,bool addEdge)
+CImageOpenGL::CImageOpenGL(f32*data,s32 width,s32 height,bool addEdge,bool logData)
 	:Width(width),Height(height),Data(0)
 {
-	fillData(data,width,height,addEdge);
+	fillData(data,width,height,addEdge,logData);
 }
 
 CImageOpenGL::~CImageOpenGL()
@@ -31,7 +31,7 @@ CImageOpenGL::~CImageOpenGL()
 	}
 }
 
-void CImageOpenGL::fillData(f32*data,s32 width,s32 height,bool addEdge)
+void CImageOpenGL::fillData(f32*data,s32 width,s32 height,bool addEdge,bool logData)
 {
 	
 
@@ -59,6 +59,7 @@ void CImageOpenGL::fillData(f32*data,s32 width,s32 height,bool addEdge)
 		if(minValue == maxValue)
 			maxValue+=1.0f;
 		//fill image
+
 		for(s32 i=0;i<width;i++)
 		{
 			s32 startDrawPos = (s32)(height-height*((data[i]-minValue)/(maxValue-minValue)));
@@ -75,7 +76,18 @@ void CImageOpenGL::fillData(f32*data,s32 width,s32 height,bool addEdge)
 		Width=width;
 		Height = height;
 		//scale image data to get a better visual
-		memcpy(Data,data,width*height*sizeof(f32));
+		if(logData)
+		{
+			for(s32 i=0;i<Height;i++)
+			{
+				for(s32 j=0;j<Width;j++)
+				{
+					Data[i*Width+j] = logf(data[i*Width+j]);
+				}
+			}
+		}
+		else
+			memcpy(Data,data,width*height*sizeof(f32));
 	}
 	f32 maxValue = 0.0f,minValue =1.0f;
 	for(s32 i=0;i<width*height;i++)
@@ -98,7 +110,7 @@ void CImageOpenGL::fillData(f32*data,s32 width,s32 height,bool addEdge)
 		//return a white image
 		for(s32 i=0;i<width*height;i++)
 		{
-			Data[i] =1.0f;
+			Data[i] =0.1f;
 		}
 	}
 	//add outline

@@ -101,6 +101,8 @@ public:
 	afx_msg void OnPaint();
 	afx_msg void OnObjA_LengthAccuracy();
 	afx_msg void OnTrianglePathLength();
+	afx_msg void OnNEQCalculation();
+	afx_msg void OnMetalUniformity();
 };
 
 #ifndef _DEBUG  // amsdView.cpp 中的调试版本

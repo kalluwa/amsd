@@ -122,10 +122,14 @@
     <ClInclude Include="amsdDoc.h" />
     <ClInclude Include="amsdView.h" />
     <ClInclude Include="App.h" />
-    <ClInclude Include="calcHelper.h" />
+    <ClInclude Include="Calculation\calcHelper.h" />
+    <ClInclude Include="Calculation\FFTHelper.h" />
+    <ClInclude Include="Calculation\LengthAccuracy.h" />
+    <ClInclude Include="Calculation\MetalUniformity.h" />
+    <ClInclude Include="Calculation\NEQCalculation.h" />
+    <ClInclude Include="Calculation\TrianglePathLength.h" />
     <ClInclude Include="CalendarBar.h" />
     <ClInclude Include="EventTypes.h" />
-    <ClInclude Include="LengthAccuracy.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Src\Core\aabbox3d.h" />
@@ -159,16 +163,19 @@
     <ClInclude Include="Src\Scene\IVolumeTexture.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="TrianglePathLength.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="amsd.cpp" />
     <ClCompile Include="amsdDoc.cpp" />
     <ClCompile Include="amsdView.cpp" />
     <ClCompile Include="App.cpp" />
-    <ClCompile Include="calcHelper.cpp" />
+    <ClCompile Include="Calculation\calcHelper.cpp" />
+    <ClCompile Include="Calculation\FFTHelper.cpp" />
+    <ClCompile Include="Calculation\LengthAccuracy.cpp" />
+    <ClCompile Include="Calculation\MetalUniformity.cpp" />
+    <ClCompile Include="Calculation\NEQCalculation.cpp" />
+    <ClCompile Include="Calculation\TrianglePathLength.cpp" />
     <ClCompile Include="CalendarBar.cpp" />
-    <ClCompile Include="LengthAccuracy.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="Src\Driver\COpenGLDriver.cpp" />
     <ClCompile Include="Src\Scene\CImageOpenGL.cpp" />
@@ -181,12 +188,12 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="TrianglePathLength.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="amsd.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Library Include="Calculation\libfftw3f-3.lib" />
     <Library Include="Src\Driver\cg.lib" />
     <Library Include="Src\Driver\cgGL.lib" />
     <Library Include="Src\Driver\glew32.lib" />

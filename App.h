@@ -13,7 +13,7 @@
 #include "Src/Driver/EDriverType.h"
 #include "Src/Scene/CSimpleCameraNode.h"
 #include "Src/Scene/CSceneManager.h"
-#include "calcHelper.h"
+#include "Calculation/calcHelper.h"
 
 class IApp
 {
@@ -32,7 +32,7 @@ public:
 	virtual void draw();
 
 	virtual void runCalculation(Calculation::ECalType type);
-
+	virtual void viewSliceZ(kk::s32 keyCode);
 	//dispatch event
 	virtual void OnEvent(SEvent event);
 

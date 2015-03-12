@@ -13,12 +13,12 @@ class CImageOpenGL
 {
 public:
 	CImageOpenGL();
-	CImageOpenGL(f32* data,s32 width,s32 height,bool addEdge=false);
+	CImageOpenGL(f32* data,s32 width,s32 height,bool addEdge=false,bool logData = false);
 
 	virtual ~CImageOpenGL();
 	virtual f32* getData(){return Data;};
 
-	virtual void fillData(f32* data,s32 width,s32 height,bool addEdge);
+	virtual void fillData(f32* data,s32 width,s32 height,bool addEdge,bool logData=false);
 	virtual void render();
 
 	virtual core::vector2di getImageSize();

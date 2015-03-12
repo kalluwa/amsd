@@ -27,7 +27,7 @@
 #endif
 
 #include "Src/EventTypes.h"
-#include "calcHelper.h"
+#include "Calculation/calcHelper.h"
 using namespace Calculation;
 // CamsdView
 
@@ -55,6 +55,8 @@ BEGIN_MESSAGE_MAP(CamsdView, CView)
 	ON_WM_PAINT()
 	ON_COMMAND(ID_BUTTON2, &CamsdView::OnObjA_LengthAccuracy)
 	ON_COMMAND(ID_BUTTON3, &CamsdView::OnTrianglePathLength)
+	ON_COMMAND(ID_BUTTON4, &CamsdView::OnNEQCalculation)
+	ON_COMMAND(ID_BUTTON6, &CamsdView::OnMetalUniformity)
 END_MESSAGE_MAP()
 
 // CamsdView 构造/析构
@@ -521,6 +523,32 @@ void CamsdView::OnTrianglePathLength()
 	event.type = ET_USER;
 	event.UserData.type = EUT_CALCULATION;
 	event.UserData.calType = ECT_TRIANGLE_PATH_LENGTH;
+
+	app->OnEvent(event);
+	updateViewWindow();
+}
+
+
+void CamsdView::OnNEQCalculation()
+{
+	// TODO: 在此添加命令处理程序代码
+	SEvent event;
+	event.type = ET_USER;
+	event.UserData.type = EUT_CALCULATION;
+	event.UserData.calType = ECT_NEQ_CALCULATION;
+
+	app->OnEvent(event);
+	updateViewWindow();
+}
+
+
+void CamsdView::OnMetalUniformity()
+{
+	// TODO: 在此添加命令处理程序代码
+	SEvent event;
+	event.type = ET_USER;
+	event.UserData.type = EUT_CALCULATION;
+	event.UserData.calType = ECT_METAL_UNIFORMITY;
 
 	app->OnEvent(event);
 	updateViewWindow();

@@ -6,7 +6,7 @@
 
 //memset
 #include "Core/kkString.h"
-#include "../calcHelper.h"
+#include "../Calculation/calcHelper.h"
 
 //main event type
 enum EventType
@@ -40,7 +40,7 @@ enum EUserType
 {
 	EUT_RESIZE,
 	//calculation
-	EUT_CALCULATION
+	EUT_CALCULATION,
 };
 struct SEvent
 {

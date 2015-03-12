@@ -210,12 +210,6 @@
     <ClInclude Include="Src\Scene\IVolumeTexture.h">
       <Filter>Src\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="calcHelper.h">
-      <Filter>calculation</Filter>
-    </ClInclude>
-    <ClInclude Include="LengthAccuracy.h">
-      <Filter>calculation</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Scene\ImageBatches.h">
       <Filter>Src\Scene</Filter>
     </ClInclude>
@@ -225,7 +219,22 @@
     <ClInclude Include="src\scene\CImageOpenGL.h">
       <Filter>Src\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="TrianglePathLength.h">
+    <ClInclude Include="Calculation\LengthAccuracy.h">
+      <Filter>calculation</Filter>
+    </ClInclude>
+    <ClInclude Include="Calculation\MetalUniformity.h">
+      <Filter>calculation</Filter>
+    </ClInclude>
+    <ClInclude Include="Calculation\NEQCalculation.h">
+      <Filter>calculation</Filter>
+    </ClInclude>
+    <ClInclude Include="Calculation\TrianglePathLength.h">
+      <Filter>calculation</Filter>
+    </ClInclude>
+    <ClInclude Include="Calculation\calcHelper.h">
+      <Filter>calculation</Filter>
+    </ClInclude>
+    <ClInclude Include="Calculation\FFTHelper.h">
       <Filter>calculation</Filter>
     </ClInclude>
   </ItemGroup>
@@ -266,19 +275,28 @@
     <ClCompile Include="Src\Scene\IVolumeTexture.cpp">
       <Filter>Src\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="calcHelper.cpp">
-      <Filter>calculation</Filter>
-    </ClCompile>
-    <ClCompile Include="LengthAccuracy.cpp">
-      <Filter>calculation</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Scene\ImageBatches.cpp">
       <Filter>Src\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Src\Scene\CImageOpenGL.cpp">
       <Filter>Src\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="TrianglePathLength.cpp">
+    <ClCompile Include="Calculation\LengthAccuracy.cpp">
+      <Filter>calculation</Filter>
+    </ClCompile>
+    <ClCompile Include="Calculation\MetalUniformity.cpp">
+      <Filter>calculation</Filter>
+    </ClCompile>
+    <ClCompile Include="Calculation\NEQCalculation.cpp">
+      <Filter>calculation</Filter>
+    </ClCompile>
+    <ClCompile Include="Calculation\TrianglePathLength.cpp">
+      <Filter>calculation</Filter>
+    </ClCompile>
+    <ClCompile Include="Calculation\calcHelper.cpp">
+      <Filter>calculation</Filter>
+    </ClCompile>
+    <ClCompile Include="Calculation\FFTHelper.cpp">
       <Filter>calculation</Filter>
     </ClCompile>
   </ItemGroup>
@@ -299,6 +317,9 @@
     </Library>
     <Library Include="Src\Driver\cg.lib">
       <Filter>Src\Driver\libs</Filter>
+    </Library>
+    <Library Include="Calculation\libfftw3f-3.lib">
+      <Filter>calculation</Filter>
     </Library>
   </ItemGroup>
 </Project>

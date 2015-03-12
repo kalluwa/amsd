@@ -9,8 +9,10 @@
 #include "Src/Scene/ImageBatches.h"
 
 //for calculation
-#include "LengthAccuracy.h"
-#include "TrianglePathLength.h"
+#include "Calculation/LengthAccuracy.h"
+#include "Calculation/TrianglePathLength.h"
+#include "Calculation/NeqCalculation.h"
+#include "Calculation/MetalUniformity.h"
 
 using namespace kk;
 using namespace Calculation;
@@ -40,7 +42,7 @@ bool keyCtrl=false;
 
 		//add camera node
 		kk::scene::CSimpleCameraNode* simplecamera = new kk::scene::CSimpleCameraNode(driver,
-			kk::core::vector3df(0,0,3),kk::core::vector3df(0,0,0),kk::core::vector3df(0,1,0));
+			kk::core::vector3df(-2,0,1),kk::core::vector3df(0,0,0),kk::core::vector3df(0,1,0));
 		scene->addCamera(simplecamera);
 		//nodes.push_back(simplecamera);
 
@@ -49,7 +51,7 @@ bool keyCtrl=false;
 		// 756*656*252*4bytes = 484.3125MB and my video card memory is 492MB
 		volumeTexture = new kk::scene::COpenglVolumeTexture(driver,
 			//"F:\\CT\\data\\N42.45_A.raw",640,544,240,1.2f,1.2f,3.333f);//288 error
-			"F:\\CT\\N42.45.rcn",768,656,126,1.35f,1.35f,6.67f);//,125);//125
+			"F:\\CT\\N42.45.rcn",768,656,126,1.35f,1.35f,6.67f,126);//,125);//125
 		scene->addNodeToRender(volumeTexture);
 
 		scene::ImageBatches* batches = new scene::ImageBatches(driver);
@@ -153,6 +155,10 @@ bool keyCtrl=false;
 		{
 		case ET_KEY:
 			keyCtrl = event.Key.control;
+
+			//debug slice
+			viewSliceZ(event.Key.keycode);
+
 			break;
 		case ET_MOUSE:
 			if(event.Mouse.mouseaction == EMT_MIDDLE_DOWN)
@@ -223,7 +229,86 @@ bool keyCtrl=false;
 				delete boxData;
 			}
 			break;
+		case Calculation::ECT_NEQ_CALCULATION:
+			{
+				Calculation::BoxData* boxData = new BoxData(volumeTexture->getVolumeData(),volumeTexture->getVolumeSizeX(),volumeTexture->getVolumeSizeY(),volumeTexture->getVolumeSizeZ(),volumeTexture->getSelectedBoundingBox());
+				core::aabbox3di tmpBox = Amsd_NEQCalculation(boxData,scene);
+				//debug
+				core::vector3df offset(-0.5f,-0.5f,-0.5f);
+				pickBox.MinEdge = offset+core::vector3df(tmpBox.MinEdge.X/(f32)volumeTexture->getVolumeSizeX(),tmpBox.MinEdge.Y/(f32)volumeTexture->getVolumeSizeY(),tmpBox.MinEdge.Z/(f32)volumeTexture->getVolumeSizeZ());
+				pickBox.MaxEdge = offset+core::vector3df(tmpBox.MaxEdge.X/(f32)volumeTexture->getVolumeSizeX(),tmpBox.MaxEdge.Y/(f32)volumeTexture->getVolumeSizeY(),tmpBox.MaxEdge.Z/(f32)volumeTexture->getVolumeSizeZ());
+				//debug end
+				if(boxData)
+				delete boxData;
+			}
+			break;
+		case Calculation::ECT_METAL_UNIFORMITY:
+			{
+				Calculation::BoxData* boxData = new BoxData(volumeTexture->getVolumeData(),volumeTexture->getVolumeSizeX(),volumeTexture->getVolumeSizeY(),volumeTexture->getVolumeSizeZ(),volumeTexture->getSelectedBoundingBox());
+				core::aabbox3di tmpBox = Amsd_MetalUniformity(boxData,scene);
+				//debug
+				core::vector3df offset(-0.5f,-0.5f,-0.5f);
+				pickBox.MinEdge = offset+core::vector3df(tmpBox.MinEdge.X/(f32)volumeTexture->getVolumeSizeX(),tmpBox.MinEdge.Y/(f32)volumeTexture->getVolumeSizeY(),tmpBox.MinEdge.Z/(f32)volumeTexture->getVolumeSizeZ());
+				pickBox.MaxEdge = offset+core::vector3df(tmpBox.MaxEdge.X/(f32)volumeTexture->getVolumeSizeX(),tmpBox.MaxEdge.Y/(f32)volumeTexture->getVolumeSizeY(),tmpBox.MaxEdge.Z/(f32)volumeTexture->getVolumeSizeZ());
+				//debug end
+				if(boxData)
+				delete boxData;
+			}
+			break;
 		}
+	}
 
+	void IApp::viewSliceZ(kk::s32 keyCode)
+	{
+		bool needUpdate = false;
+		//for debug slice change
+			switch(keyCode)
+			{
+			case VK_LEFT:
+				Calculation::debugSlicePos--;
+				needUpdate = true;
+				break;
+			case VK_RIGHT:
+				Calculation::debugSlicePos++;
+				needUpdate = true;
+				break;
+			}
+		if(!needUpdate)
+			return ;
+		Calculation::BoxData* boxData =new BoxData(volumeTexture->getVolumeData(),volumeTexture->getVolumeSizeX(),
+					volumeTexture->getVolumeSizeY(),volumeTexture->getVolumeSizeZ(),
+					volumeTexture->getSelectedBoundingBox());
+		if(Calculation::debugSlicePos>=volumeTexture->getVolumeSizeZ())
+			Calculation::debugSlicePos = volumeTexture->getVolumeSizeZ()-1;
+		if(Calculation::debugSlicePos<=0)
+			Calculation::debugSlicePos =0;
 
+		/*if(Calculation::debugSlicePos <= (pickBox.MaxEdge.Z+0.5f)*volumeTexture->getVolumeSizeZ())
+					Calculation::debugSlicePos = (pickBox.MaxEdge.Z+0.5f)*volumeTexture->getVolumeSizeZ()-1;
+		if(Calculation::debugSlicePos >= (pickBox.MinEdge.Z+0.5f)*volumeTexture->getVolumeSizeZ())
+					Calculation::debugSlicePos = (0.5f+pickBox.MinEdge.Z)*volumeTexture->getVolumeSizeZ()-1;
+*/
+				
+		f32* sliceImage=0;
+		s32 width=0;
+		s32 height=0;
+		if(debugSlicePos == -1)
+		debugSlicePos = (boxData->Box.MinEdge.Z+boxData->Box.MaxEdge.Z)/2;
+		boxData->getSliceZ(sliceImage,debugSlicePos,width,height,0.2f);
+
+		s32 count = boxData->getSliceZPassVoxelCount(debugSlicePos);
+#ifdef _DEBUG
+		char tm[50];
+		sprintf_s(tm,50,"count=%i MaxValue=%.3f",count,boxData->getSliceZMaxValue(debugSlicePos));
+		::OutputDebugStringA(tm);
+#endif
+		//image batches
+		scene::ImageBatches* batches = dynamic_cast<scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
+		scene::CImageOpenGL* img = new scene::CImageOpenGL(sliceImage,width,height,true);
+		batches->addImage(img,core::rect<s32>(0,0,width,height));
+
+		if(sliceImage)
+			delete []sliceImage;
+		if(boxData)
+			delete boxData;
 	}
