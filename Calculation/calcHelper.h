@@ -58,7 +58,7 @@ namespace Calculation
 		void getSliceZ(f32*& dataToFill,s32 sliceNo,s32& width,s32& height,f32 threshold = -1000.0f) const;
 		f32 getSliceZMaxValue(s32 sliceAbsolutePos);
 
-		s32 getSliceZPassVoxelCount(s32 sliceAbsolutePos,f32 threshold=0.2f) const;
+		s32 getSliceZPassVoxelCount(s32 sliceAbsolutePos,f32& maxValue,f32& minValue,f32 threshold=0.2f) const;
 		void getCoronalImage(f32*& dataToFill,s32& width,s32&height) const;
 		void getCoronalImageEliminateAir(f32*& dataToFill,s32& width,s32&height,f32 threshold) const;
 
@@ -108,12 +108,43 @@ namespace Calculation
 		//apply radial hanning window
 		void applyRadialWindow(f32 mmInXY);
 		void resizeImage();
+		//get pixel
+		f32 getPixelValue(s32 x,s32 y);
 
 		f32* Data;
 		s32 Width, Height;
 		core::vector3di BasePos;
 
 	};//end class
+
+	class RawData
+	{
+	public:
+		RawData(f32*raw,s32 length);
+
+		f32 getMinValue() const;
+		f32 getMaxValue() const;
+		f32 getStdValue() const;
+		f32 getMeanValue()const;
+
+		f32* Raw;
+		s32 Length;
+	};
+
+	class RawDataArray
+	{
+		public:
+		RawDataArray(core::array<f32>* rawArray);
+
+		f32 getMinValue() const;
+		f32 getMaxValue() const;
+		f32 getStdValue() const;
+		f32 getMeanValue()const;
+
+		core::array<f32>* Raw;
+	};
+
+	
 }
 
 #endif//end header

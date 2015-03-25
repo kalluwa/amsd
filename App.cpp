@@ -51,7 +51,7 @@ bool keyCtrl=false;
 		// 756*656*252*4bytes = 484.3125MB and my video card memory is 492MB
 		volumeTexture = new kk::scene::COpenglVolumeTexture(driver,
 			//"F:\\CT\\data\\N42.45_A.raw",640,544,240,1.2f,1.2f,3.333f);//288 error
-			"F:\\CT\\N42.45.rcn",768,656,126,1.35f,1.35f,6.67f,126);//,125);//125
+			"F:\\CT\\N42.45.rcn",768,656,126,1.35f,1.35f,6.67f,0);//126);//,125);//125
 		scene->addNodeToRender(volumeTexture);
 
 		scene::ImageBatches* batches = new scene::ImageBatches(driver);
@@ -295,8 +295,8 @@ bool keyCtrl=false;
 		if(debugSlicePos == -1)
 		debugSlicePos = (boxData->Box.MinEdge.Z+boxData->Box.MaxEdge.Z)/2;
 		boxData->getSliceZ(sliceImage,debugSlicePos,width,height,0.2f);
-
-		s32 count = boxData->getSliceZPassVoxelCount(debugSlicePos);
+		f32 tmpMin,tmpMax;
+		s32 count = boxData->getSliceZPassVoxelCount(debugSlicePos,tmpMax,tmpMin);
 #ifdef _DEBUG
 		char tm[50];
 		sprintf_s(tm,50,"count=%i MaxValue=%.3f",count,boxData->getSliceZMaxValue(debugSlicePos));

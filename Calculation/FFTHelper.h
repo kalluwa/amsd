@@ -18,7 +18,8 @@ namespace Calculation
 #define complex_allocate fftwf_malloc
 #define complex_plan fftwf_plan
 #define complex_fft_2d fftwf_plan_dft_2d
-#define complex_fft_1d fftwf_paln_dft_1d
+#define complex_fft_1d fftwf_plan_dft_1d
+#define complex_fft_1d_real fftwf_plan_dft_r2c_1d
 #define complex_execute fftwf_execute
 #define complex_deplan fftwf_destroy_plan
 #define complex_free fftwf_free
@@ -34,5 +35,6 @@ namespace Calculation
 //internal functions #####################################
 	extern void getImageDataSquareAmplitude(f32* data,f32*& outResult,s32 width,s32 height);
 
+	extern void getTransfromed1DDataMagnitude(f32*data,f32*&outResult,s32 size);
 }
 #endif 

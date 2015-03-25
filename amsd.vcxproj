@@ -118,15 +118,31 @@
     <None Include="res\writesmall.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="alglib\alglibinternal.h" />
+    <ClInclude Include="alglib\alglibmisc.h" />
+    <ClInclude Include="alglib\ap.h" />
+    <ClInclude Include="alglib\dataanalysis.h" />
+    <ClInclude Include="alglib\diffequations.h" />
+    <ClInclude Include="alglib\fasttransforms.h" />
+    <ClInclude Include="alglib\integration.h" />
+    <ClInclude Include="alglib\interpolation.h" />
+    <ClInclude Include="alglib\linalg.h" />
+    <ClInclude Include="alglib\optimization.h" />
+    <ClInclude Include="alglib\solvers.h" />
+    <ClInclude Include="alglib\specialfunctions.h" />
+    <ClInclude Include="alglib\statistics.h" />
+    <ClInclude Include="alglib\stdafx.h" />
     <ClInclude Include="amsd.h" />
     <ClInclude Include="amsdDoc.h" />
     <ClInclude Include="amsdView.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="Calculation\calcHelper.h" />
+    <ClInclude Include="Calculation\CTValueConsistency.h" />
     <ClInclude Include="Calculation\FFTHelper.h" />
     <ClInclude Include="Calculation\LengthAccuracy.h" />
     <ClInclude Include="Calculation\MetalUniformity.h" />
     <ClInclude Include="Calculation\NEQCalculation.h" />
+    <ClInclude Include="Calculation\PolyfitHelper.h" />
     <ClInclude Include="Calculation\TrianglePathLength.h" />
     <ClInclude Include="CalendarBar.h" />
     <ClInclude Include="EventTypes.h" />
@@ -165,15 +181,30 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="alglib\alglibinternal.cpp" />
+    <ClCompile Include="alglib\alglibmisc.cpp" />
+    <ClCompile Include="alglib\ap.cpp" />
+    <ClCompile Include="alglib\dataanalysis.cpp" />
+    <ClCompile Include="alglib\diffequations.cpp" />
+    <ClCompile Include="alglib\fasttransforms.cpp" />
+    <ClCompile Include="alglib\integration.cpp" />
+    <ClCompile Include="alglib\interpolation.cpp" />
+    <ClCompile Include="alglib\linalg.cpp" />
+    <ClCompile Include="alglib\optimization.cpp" />
+    <ClCompile Include="alglib\solvers.cpp" />
+    <ClCompile Include="alglib\specialfunctions.cpp" />
+    <ClCompile Include="alglib\statistics.cpp" />
     <ClCompile Include="amsd.cpp" />
     <ClCompile Include="amsdDoc.cpp" />
     <ClCompile Include="amsdView.cpp" />
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Calculation\calcHelper.cpp" />
+    <ClCompile Include="Calculation\CTValueConsistency.cpp" />
     <ClCompile Include="Calculation\FFTHelper.cpp" />
     <ClCompile Include="Calculation\LengthAccuracy.cpp" />
     <ClCompile Include="Calculation\MetalUniformity.cpp" />
     <ClCompile Include="Calculation\NEQCalculation.cpp" />
+    <ClCompile Include="Calculation\PolyfitHelper.cpp" />
     <ClCompile Include="Calculation\TrianglePathLength.cpp" />
     <ClCompile Include="CalendarBar.cpp" />
     <ClCompile Include="MainFrm.cpp" />

@@ -225,8 +225,8 @@ public:
 	{
 		if (data)
 		{
-			for (u32 i=0; i<used; ++i)
-				allocator.destruct(&data[i]);
+			//for (u32 i=0; i<used; ++i)
+			//	allocator.destruct(&data[i]);
 
 			delete [] data;
 		}

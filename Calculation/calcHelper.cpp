@@ -166,8 +166,20 @@ f32 BoxData::getSumValumeZ() const
 //standard error
 f32 BoxData::getStdValue() const
 {
+	f32 meanValue = getMeanValue();
+	f32 stdSum=0.0f;
+	s32 boxSize = (1+Box.MaxEdge.Z-Box.MinEdge.Z)+
+		(1+Box.MaxEdge.Y-Box.MinEdge.Y)+
+		(1+Box.MaxEdge.X-Box.MinEdge.X);
+	f32 inverseBoxSize = 1.0f / boxSize;
+	for(int z=Box.MinEdge.Z;z<=Box.MaxEdge.Z;z++)
+	for(int y=Box.MinEdge.Y;y<=Box.MaxEdge.Y;y++)
+	for(int x=Box.MinEdge.X;x<=Box.MaxEdge.X;x++)
+	{
+		stdSum += (getValue(x,y,z) - meanValue)*(getValue(x,y,z) - meanValue)*inverseBoxSize ;
+	}
 	//TODO:
-	return 0;
+	return stdSum;
 };
 
 //mean value
@@ -268,17 +280,25 @@ f32 BoxData::getSliceZMaxValue(s32 sliceAbsolutePos)
 
 	return maxValue;
 };
-s32 BoxData::getSliceZPassVoxelCount(s32 sliceAbsolutePos,f32 threshold) const
+s32 BoxData::getSliceZPassVoxelCount(s32 sliceAbsolutePos,f32& maxValue,f32& minValue,f32 threshold) const
 {
 	s32 width = LocalSize.X;s32 height =LocalSize.Y;
 	s32 count=0;
+	maxValue=-10000.0f;
+	minValue = 10000.0f;
+	f32 tmpValue =0.0f;
 	//fill
 	for(s32 y=0;y<height;y++)//z
 	{
 		for(s32 x=0;x<width;x++)//x
 		{
-			if(getValue(x+Box.MinEdge.X,y+Box.MinEdge.Y,sliceAbsolutePos)>threshold)
+			tmpValue = getValue(x+Box.MinEdge.X,y+Box.MinEdge.Y,sliceAbsolutePos);
+			if(tmpValue>threshold)
 				count++;
+			if(minValue > tmpValue)
+				minValue = tmpValue;
+			if(maxValue < tmpValue)
+				maxValue = tmpValue;
 		}
 	}
 
@@ -421,14 +441,14 @@ void SliceData::resizeImage()
 {
 	core::vector2di center = getLocalCenter();
 #define min(x,y) ((x)>(y)?(y):(x))
-	f32 minRadius_1 = min(center.X,Width-1-center.X);
-	f32 minRadius_2 = min(center.Y,Height-1-center.Y);
-	f32 minRadius = min(minRadius_1,minRadius_2);
+	f32 minRadius_1 =(f32) min(center.X,Width-1-center.X);
+	f32 minRadius_2 =(f32) min(center.Y,Height-1-center.Y);
+	f32 minRadius =(f32) min(minRadius_1,minRadius_2);
 
 	core::vector2di offset = core::vector2di((s32)(center.X-minRadius),
 		(s32)(center.Y-minRadius));
-	s32 newWidth = 2*minRadius+1;
-	s32 newHeight = 2*minRadius+1;
+	s32 newWidth = (s32)(2*minRadius+1);
+	s32 newHeight = (s32)(2*minRadius+1);
 
 	f32* newData = new f32[newWidth*newHeight];
 	for(s32 y=0;y<newHeight;y++)
@@ -455,6 +475,11 @@ core::vector3di SliceData::getAbsoluteCenter()
 	return centerPos;
 }
 
+f32 SliceData::getPixelValue(s32 x,s32 y)
+{
+	return Data[x+y*Width];
+};
+
 void SliceData::applyRadialWindow(f32 mmInXY)
 {
 	const f32 R = 148/2/mmInXY; //R in Voxel Count
@@ -476,4 +501,106 @@ void SliceData::applyRadialWindow(f32 mmInXY)
 		}
 	}
 };
+
+RawData::RawData(f32*raw,s32 length)
+	:Raw(raw),Length(length)
+{
+
+};
+
+f32 RawData::getMinValue() const
+{
+	f32 minValue = Raw[0];
+	for(s32 i=0;i<Length;i++)
+	{
+		if(minValue > Raw[i])
+			minValue = Raw[i];
+	}
+
+	return minValue;
+};
+f32 RawData::getMaxValue() const
+{
+	f32 maxValue = Raw[0];
+	for(s32 i=0;i<Length;i++)
+	{
+		if(maxValue < Raw[i])
+			maxValue = Raw[i];
+	}
+
+	return maxValue;
+};
+f32 RawData::getStdValue() const
+{
+	f32 meanValue = getMeanValue();
+	f32 sum=0.0f;
+	for(s32 i=0;i<Length;i++)
+	{
+		sum +=(Raw[i]-meanValue)*(Raw[i]-meanValue);
+	}
+
+	return (sum / Length);
+};
+f32 RawData::getMeanValue()const
+{
+	f32 meanValue = 0.0f;
+	for(s32 i=0;i<Length;i++)
+	{
+		meanValue+= Raw[i];
+	}
+	meanValue /= Length;
+	return meanValue;
+};
+
+//raw data array###################################
+RawDataArray::RawDataArray(core::array<f32>* rawArray)
+	:Raw(rawArray)
+{
+
+};
+
+f32 RawDataArray::getMinValue() const
+{
+	f32 minValue = (*Raw)[0];
+	for(s32 i=0;i<(s32)Raw->size();i++)
+	{
+		if(minValue > (*Raw)[i])
+			minValue = (*Raw)[i];
+	}
+
+	return minValue;
+};
+f32 RawDataArray::getMaxValue() const
+{
+	f32 maxValue = (*Raw)[0];
+	for(s32 i=0;i<(s32)Raw->size();i++)
+	{
+		if(maxValue < (*Raw)[i])
+			maxValue = (*Raw)[i];
+	}
+
+	return maxValue;
+};
+f32 RawDataArray::getStdValue() const
+{
+	f32 meanValue = getMeanValue();
+	f32 sum=0.0f;
+	for(s32 i=0;i<(s32)Raw->size();i++)
+	{
+		sum +=((*Raw)[i]-meanValue)*((*Raw)[i]-meanValue);
+	}
+
+	return (sum / (s32)Raw->size());
+};
+f32 RawDataArray::getMeanValue()const
+{
+	f32 meanValue = 0.0f;
+	for(s32 i=0;i<(s32)Raw->size();i++)
+	{
+		meanValue+= (*Raw)[i];
+	}
+	meanValue /= (s32)Raw->size();
+	return meanValue;
+};
+
 }//end namespace 

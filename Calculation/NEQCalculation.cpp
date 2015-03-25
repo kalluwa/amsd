@@ -6,8 +6,14 @@
 #include <Windows.h>
 #include "../Src/scene/CImageOpenGL.h"
 #include "../Src/scene/ImageBatches.h"
+
 //fft helper
 #include "FFTHelper.h"
+//fit help.h
+#include "PolyfitHelper.h"
+
+//ctvalueconsistency
+#include "CTValueConsistency.h"
 
 namespace Calculation
 {
@@ -19,10 +25,12 @@ they are 3 main part in the following code
 */
 core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene)
 {
-	data->Box.MinEdge.X-=5;
-	data->Box.MinEdge.Y-=5;
-	data->Box.MaxEdge.X+=5;
-	data->Box.MaxEdge.Y+=5;
+	//make the rectangle larger to contain every pixel inside the ball
+	s32 enlargeNumber = abs(data->Box.getExtent().X - data->Box.getExtent().Y);
+	data->Box.MinEdge.X-=enlargeNumber;
+	data->Box.MinEdge.Y-=enlargeNumber;
+	data->Box.MaxEdge.X+=enlargeNumber;
+	data->Box.MaxEdge.Y+=enlargeNumber;
 	data->updateSize();
 //pre process
 //remove extra part shold be done in volumeTexture class
@@ -32,9 +40,10 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene)
 	//get max voxel count
 	s32 maxValue=0;
 	core::array<s32> passedVoxelCount;
+	f32 tmpMin,tmpMax;
 	for(s32 slicePos = data->Box.MinEdge.Z;slicePos <= data->Box.MaxEdge.Z;slicePos++)
 	{
-		s32 count = data->getSliceZPassVoxelCount(slicePos,0.2f);
+		s32 count = data->getSliceZPassVoxelCount(slicePos,tmpMax,tmpMin,0.2f);
 		if(count > maxValue)
 			maxValue = count;
 
@@ -120,6 +129,10 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene)
 	Width = slices[0]->Width;
 	Height = slices[0]->Height;
 
+	//#####################################################
+	//perform CT Value Consistency
+	CTValueConsistencyResult consistency_result= Amsd_CTValueConsistency(data,scene,slices);
+	//#####################################################
 	//apply radial window
 	//scene::IVolumeTexture* volume = dynamic_cast<scene::IVolumeTexture>(scene->getSpecificNodeById("IVolumeTexture"));
 	kk::scene::IVolumeTexture* volume = dynamic_cast<kk::scene::IVolumeTexture*>(scene->getSpecificNodeById("IVolumeTexture"));
@@ -193,12 +206,12 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene)
 	f32 stepUnit = 1.0f/(0.1f*mmInXY);//7.4 cm-1
 	stepUnit = stepUnit / ((Width - centerNPS.X)/stride);//7.4 /howManySteps cm-1
 	//##########################unit
-	s32 stepCount = (s32)(sqrtf((f32)((Width-centerNPS.X)*(Width-centerNPS.X)+
+	s32 NPS_stepCount = (s32)(sqrtf((f32)((Width-centerNPS.X)*(Width-centerNPS.X)+
 			(Height-centerNPS.Y)*(Height-centerNPS.Y)))/stride)+100;
-	f32* nps1dValues = new f32[stepCount];//interval is stepUnit
-	s32* nps1dValuesCount = new s32[stepCount];
-	memset(nps1dValues,0,sizeof(f32)*stepCount);
-	memset(nps1dValuesCount,0,sizeof(s32)*stepCount);
+	f32* nps1dValues = new f32[NPS_stepCount];//interval is stepUnit
+	s32* nps1dValuesCount = new s32[NPS_stepCount];
+	memset(nps1dValues,0,sizeof(f32)*NPS_stepCount);
+	memset(nps1dValuesCount,0,sizeof(s32)*NPS_stepCount);
 	for(s32 x=0;x<(s32)Width;x++)//average
 	{
 	for(s32 y=0;y<(s32)Height;y++)
@@ -212,7 +225,7 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene)
 
 		f32 distance = min(min(dis1,dis2),min(dis3,dis4));
 		distance *=inverseStride;
-		if(distance >= stepCount)
+		if(distance >= NPS_stepCount)
 			continue;//ignore 4 corner
 		//set nps1d value
 		nps1dValues[(s32)distance] += npsAverage->Data[x+y*Width];
@@ -220,7 +233,7 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene)
 	}
 	}
 	//average nps1dvalue
-	for(s32 i=0;i<stepCount;i++)
+	for(s32 i=0;i<NPS_stepCount;i++)
 	{
 		if(!nps1dValuesCount[i])
 			continue;
@@ -230,7 +243,7 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene)
 	//get sample result
 	s32 actualStride = (s32)(0.5f / stepUnit);
 	core::array<f32> sampleValues;
-	for(s32 i = actualStride; i<stepCount;i+= actualStride)
+	for(s32 i = actualStride; i<NPS_stepCount;i+= actualStride)
 	{
 		sampleValues.push_back(nps1dValues[i]);
 	}
@@ -254,9 +267,9 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene)
 		nps1dgraph[i]=sampleValues[i];
 	}
 	//image batches
-	scene::ImageBatches* batches = dynamic_cast<scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
-	scene::CImageOpenGL* img = new scene::CImageOpenGL(nps1dgraph,sampleValues.size(),1,true);
-	batches->addImage(img,core::rect<s32>(0,0,Width,Height));
+	//scene::ImageBatches* batches = dynamic_cast<scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
+	//scene::CImageOpenGL* img = new scene::CImageOpenGL(nps1dgraph,sampleValues.size(),1,true);
+	//batches->addImage(img,core::rect<s32>(0,0,Width,Height));
 
 	//if(sliceImage)
 		//delete []sliceImage;
@@ -275,14 +288,178 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene)
 		throw "Not Found Center Slice";
 	//process center slice
 	//3_1: ERF
-	/*scene::ImageBatches* batches = dynamic_cast<scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
-	scene::CImageOpenGL* img = new scene::CImageOpenGL(MiddleSlice->Data,MiddleSlice->Width,MiddleSlice->Height,true);
-	batches->addImage(img,core::rect<s32>(0,0,Width,Height));
-*/
+
+	f32 ERF_step = 0.1f;//.1 pixel
+	core::vector2di ERF_center = core::vector2di(Width/2,Height/2);
+	//get longest distance to center
+	f32 distance_1 = sqrtf((f32)(ERF_center.X*ERF_center.X+ERF_center.Y+ERF_center.Y));
+	f32 distance_2 = sqrtf((f32)((Width-1-ERF_center.X)*(Width-1-ERF_center.X)+ERF_center.Y+ERF_center.Y));
+	f32 distance_3 = sqrtf((f32)(ERF_center.X*ERF_center.X+(Height-1-ERF_center.Y)+(Height-1-ERF_center.Y)));
+	f32 distance_4 = sqrtf((f32)((Width-1-ERF_center.X)*(Width-1-ERF_center.X)+(Height-1-ERF_center.Y)+(Height-1-ERF_center.Y)));
+
+	f32 maxDistance = max(max(distance_1,distance_2),max(distance_3,distance_4));
+	s32 ERF_stepCount = (s32)(maxDistance/ERF_step)+1;
+	f32* ERF_array = new f32[ERF_stepCount];
+	s32* ERF_array_count = new s32[ERF_stepCount];
+	memset(ERF_array,0,sizeof(f32)*ERF_stepCount);
+	memset(ERF_array_count,0,sizeof(s32)*ERF_stepCount);
+	f32 ERF_maxValue=-10000.0f,ERF_minValue = 10000.0f;
+	for(s32 y=0;y<Height;y++)
+	{
+		for(s32 x=0;x<Width;x++)
+		{
+			f32 distance = sqrtf((f32)(x-ERF_center.X)*(x-ERF_center.X)+(y-ERF_center.Y)*(y-ERF_center.Y));
+			ERF_array[(s32)distance] += MiddleSlice->Data[y*Width+x];
+			ERF_array_count[(s32)distance]++;
+
+			if(MiddleSlice->Data[y*Width+x]>ERF_maxValue)
+				ERF_maxValue = MiddleSlice->Data[y*Width+x];
+			if(MiddleSlice->Data[y*Width+x]<ERF_minValue)
+				ERF_minValue =MiddleSlice->Data[y*Width+x];
+		}
+	}
+	for(s32 i=0;i<ERF_stepCount;i++)
+	{
+		if(ERF_array_count[i])
+			ERF_array[i] /=ERF_array_count[i];
+	}
+	//get valid range
+	f32 thresholdForValidRange = (ERF_minValue + ERF_maxValue) / 2;
+	s32 ERF_validStart =0,ERF_validEnd = ERF_stepCount;
+	//if we have a continuous array which all pixel value inside > threshold
+	//we mark it as the start
+	s32 validCount=0,validCountTest = (s32)(10/ERF_step);//0.1pixel->100 
+	for(s32 i=0;i<ERF_stepCount;i++)
+	{
+		if(ERF_array[i]>thresholdForValidRange)
+		{
+			validCount++;
+			if(validCount > validCountTest)
+			{
+				ERF_validStart = i-validCountTest/2+1;
+				break;
+			}
+		}
+		else
+		{
+			validCount = 0;
+		}
+	}
+	validCount =0;
+	for(s32 i=ERF_stepCount-1;i>0;i--)
+	{
+		if(ERF_array[i]<thresholdForValidRange)
+		{
+			validCount++;
+			if(validCount > validCountTest)
+			{
+				ERF_validEnd = i+validCountTest/2-1;
+				break;
+			}
+		}
+		else
+		{
+			validCount = 0;
+		}
+	}
+
+	if(ERF_validStart >= ERF_validEnd)
+		throw "Not Found Valid Range In ERF";
+	//a piece-wise, least-squares cubic fit 
+	f32* fitResult = new f32[ERF_validEnd-ERF_validStart+1];
+	for(s32 i=ERF_validStart;i<=ERF_validEnd;i++)
+	{
+		fitResult[i-ERF_validStart]= ERF_array[i];
+	}
+	//fit 11 points and replace the 6th 
+	s32 ERF_fitNumber =11;
+	s32 ERF_fitMiddleIndex = ERF_fitNumber/2;//=5
+	for(s32 i=ERF_validStart+ERF_fitMiddleIndex;i<=ERF_validEnd-ERF_fitMiddleIndex;i++)
+	{
+		fitResult[i-ERF_validStart]= getPolyfitCubicMiddleResult(ERF_array+i-ERF_fitMiddleIndex,ERF_fitNumber);
+	}
+	
 	//3_2: PSF
+	s32 PSF_count = ERF_validEnd-ERF_fitNumber-(ERF_validStart+ERF_fitNumber)+1;
+	f32* PSF =new f32[PSF_count];
+	f32 PSF_minValue =10000.0f;
+	f32 PSF_maxValue =-10000.0f;
+	f32 PSF_absMaxValue=-10000.0f;
+	s32 PSF_absMaxIndex=0;
+
+	for(s32 i=ERF_fitNumber;i<=ERF_validEnd-ERF_validStart-2*ERF_fitNumber;i++)//2 should be removed
+	{
+		PSF[i-ERF_fitNumber]=
+			getPolyfitCubicDerivativeResult(fitResult+i-ERF_fitMiddleIndex,ERF_fitNumber);
+
+		//get min and max value for normalizing psf
+		if(PSF[i-ERF_fitNumber]>PSF_maxValue)
+			PSF_maxValue = PSF[i-ERF_fitNumber];
+		if(PSF[i-ERF_fitNumber]<PSF_minValue)
+			PSF_minValue =PSF[i-ERF_fitNumber];
+		if(PSF_absMaxValue < abs(PSF[i-ERF_fitNumber]))
+		{
+			PSF_absMaxValue = abs(PSF[i-ERF_fitNumber]);
+			PSF_absMaxIndex = i;
+		}
+	}
+	//normalize the PSF
+	f32 PSF_inverseScale = 1.0f;
+	if(PSF_maxValue>PSF_minValue)
+		PSF_inverseScale = 1.0f/(PSF_maxValue-PSF_minValue);
+	for(s32 i=0;i<PSF_count;i++)
+	{
+		PSF[i]*=PSF_inverseScale;
+	}
+#ifdef _DEBUG
+
+	scene::ImageBatches* batchesPSF = dynamic_cast<scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
+	scene::CImageOpenGL* imgPSF = new scene::CImageOpenGL(PSF,100,1,true);
+	batchesPSF->addImage(imgPSF,core::rect<s32>(0,Height+2,Width,2*Height+2));
+#endif
+
 	//3_3: MTF
+	//valid range
+	s32 MTF_start =max(PSF_absMaxIndex - 50,0);
+	s32 MTF_end =min(PSF_absMaxIndex + 50,PSF_count-1);
+	f32* MTF;
+	
+	s32 MTF_count = MTF_end-MTF_start+1;
+	getTransfromed1DDataMagnitude(PSF+MTF_start,MTF,MTF_count);
 	//3_4: normalized MTF
+	f32 MTF_maxValue=-10000000.0f;
+	f32 MTF_minValue =10000000.0f;
+	for(s32 i=0;i<MTF_count;i++)
+	{
+		if(MTF[i] > MTF_maxValue)
+			MTF_maxValue =MTF[i];
+		if(MTF[i] < MTF_minValue)
+			MTF_minValue = MTF[i];
+	}
+	f32 MTF_inverseScale = 1.0f;
+	if(MTF_maxValue>MTF_minValue)
+		MTF_inverseScale = 1.0f / (MTF_maxValue-MTF_minValue);
+	for(s32 i=0;i<MTF_count;i++)
+	{
+		MTF[i] *= MTF_inverseScale;
+	}
+	
+#ifdef _DEBUG
+	scene::ImageBatches* batches = dynamic_cast<scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
+	scene::CImageOpenGL* imgMTF = new scene::CImageOpenGL(MTF,MTF_count,1,true,true);
+	batchesPSF->addImage(imgMTF,core::rect<s32>(0,0,Width,Height));
+#endif
 	//release data
+	if(PSF)
+		delete []PSF;
+	if(MTF)
+		delete []MTF;
+	if(fitResult)
+		delete []fitResult;
+	if(ERF_array_count)
+		delete[] ERF_array_count;
+	if(ERF_array)
+		delete[] ERF_array;
 	if(MiddleSlice)
 		delete MiddleSlice;
 	
