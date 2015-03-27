@@ -1,123 +1,39 @@
-//2015/3/9
+//2015/3/26
 
-#include "NeqCalculation.h"
-#include "../Src/Scene/IVolumeTexture.h"
-//for debug purpose
-#include <Windows.h>
-#include "../Src/scene/CImageOpenGL.h"
-#include "../Src/scene/ImageBatches.h"
-
-//fft helper
+#include "NEQ_NPS_Method2.h"
 #include "FFTHelper.h"
-//fit help.h
 #include "PolyfitHelper.h"
 
-//ctvalueconsistency
-#include "CTValueConsistency.h"
-
-//nps method2
-#include "NEQ_NPS_Method2.h"
+#include <Windows.h>
+#include "../Src/Scene/IVolumeTexture.h"
+#include "../Src/Scene/ImageBatches.h"
+#include "../Src/Scene/CImageOpenGL.h"
 
 namespace Calculation
 {
-
-/*
-in this function 
-we need to figure out 3 parameters:Sout & MTF & NPS
-they are 3 main part in the following code
-*/
-core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene)
+void Amsd_NEQ_NPS_UsingMethod2(BoxData* data,kk::scene::ISceneManager* scene,const core::aabbox3di& adjustedBox)
 {
-	//make the rectangle larger to contain every pixel inside the ball
-	s32 enlargeNumber = abs(data->Box.getExtent().X - data->Box.getExtent().Y);
-	data->Box.MinEdge.X-=enlargeNumber;
-	data->Box.MinEdge.Y-=enlargeNumber;
-	data->Box.MaxEdge.X+=enlargeNumber;
-	data->Box.MaxEdge.Y+=enlargeNumber;
-	data->updateSize();
-//pre process
-//remove extra part shold be done in volumeTexture class
-#if 1 //pre process
-	s32 Width = data->Box.getExtent().X;
-	s32 Height = data->Box.getExtent().Y;
-	//get max voxel count
-	s32 maxValue=0;
-	core::array<s32> passedVoxelCount;
-	f32 tmpMin,tmpMax;
-	for(s32 slicePos = data->Box.MinEdge.Z;slicePos <= data->Box.MaxEdge.Z;slicePos++)
-	{
-		s32 count = data->getSliceZPassVoxelCount(slicePos,tmpMax,tmpMin,0.2f);
-		if(count > maxValue)
-			maxValue = count;
-
-		passedVoxelCount.push_back(count);
-	}
-	//ignore those slice which valide voxel count < testValue
-	s32 testValue = maxValue / 2;
-	
-	//find the longest valid range
-	s32 realStart=-1,realEnd = -1;
-	s32 maxValidCount=0;
-	s32 tmpCount=0;
-	for(s32 i=0;i<(s32)passedVoxelCount.size();i++)
-	{
-		f32 sliceMaxValue = data->getSliceZMaxValue(data->Box.MinEdge.Z+i);
-		if(passedVoxelCount[i] > testValue || sliceMaxValue>6.0f)
-		{
-			tmpCount++;
-			if(tmpCount>maxValidCount)
-			{
-				realStart = i-tmpCount;
-				realEnd = i;
-				maxValidCount = tmpCount;
-			}
-			//test
-			if(sliceMaxValue)
-			{
-				//realStart = i-tmpCount;
-				realEnd = i;
-				maxValidCount = realEnd-realStart+1;
-			}
-		}
-		else
-		{
-			tmpCount =0;
-		}
-	}
-	passedVoxelCount.clear();
-	//adjust boundingbox
-	core::aabbox3di adjustedBox = data->Box;
-	adjustedBox.MinEdge.Z = data->Box.MinEdge.Z+realStart;
-	adjustedBox.MaxEdge.Z = data->Box.MinEdge.Z+realEnd;
-#endif //end pre process
-	
-	
-//sout
-#if 1
-//1 for Sout Calculation
-//Sout is average CT Value of the object
-#endif
-
-
-	//###########################################
-	//using NPS method 2
-	Amsd_NEQ_NPS_UsingMethod2(data,scene,adjustedBox);
-	//###########################################
-
 	SliceData* MiddleSlice=0;
 //2 NPS
 #if 1
 	//get 32 paired images and get differences
 	core::array<SliceData*> slices;
 	s32 middleSliceIndex = (adjustedBox.MinEdge.Z + adjustedBox.MaxEdge.Z)/2;
-	for(s32 i=adjustedBox.MinEdge.Z+3;i<adjustedBox.MaxEdge.Z-3;i+=2)
+	
+	//create a empty slice
+	s32 sumSliceWidth = data->Box.MaxEdge.X-data->Box.MinEdge.X+1;
+	s32 sumSliceHeight = data->Box.MaxEdge.Y- data->Box.MinEdge.Y+1;
+	SliceData* sumSliceData = new SliceData(sumSliceWidth,sumSliceHeight);
+	s32 npsSliceCount=0;
+	for(s32 i=adjustedBox.MinEdge.Z+3;i<adjustedBox.MaxEdge.Z-3;i++)
 	{
+		//store all slice data
 		SliceData* slice1=new SliceData(data->OriginalData,data,i);
-		SliceData* slice2=new SliceData(data->OriginalData,data,i+1);
 
-		slice1->subSlice(slice2);
+		sumSliceData->plusSlice(slice1);
+
+		//make image square
 		slice1->resizeImage();
-		delete slice2;
 		slices.push_back(slice1);
 
 		//mtf slice
@@ -128,25 +44,34 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene)
 			MiddleSlice = new SliceData(data->OriginalData,data,i);
 			MiddleSlice->resizeImage();
 		}
-		else if(i+1 == middleSliceIndex)
-		{
-			
-			if(MiddleSlice)
-				delete MiddleSlice;
-			middleSliceIndex = i+1;
-			MiddleSlice = new SliceData(data->OriginalData,data,i+1);
-			MiddleSlice->resizeImage();
-		}
+		npsSliceCount++;
 	}
 
+	if(npsSliceCount==0)
+	{
+		MessageBoxA(NULL,"NPS Slice Count Counldn't Be Zero","Error",0);
+		return;
+		//throw "NPS Slice Count Counldn't Be Zero";
+	}
+	//get average sum nps
+	sumSliceData->resizeImage();
+	for(s32 i=0;i<sumSliceData->Width;i++)
+	{
+		for(s32 j=0;j<sumSliceData->Height;j++)
+		{
+			sumSliceData->setPixelValue(i,j,sumSliceData->getPixelValue(i,j)/npsSliceCount);
+		}
+	}
+	//get noise
+	for(s32 i=0;i<(s32)slices.size();i++)
+	{
+		slices[i]->subSlice(sumSliceData);
+	}
+	if(sumSliceData)
+		delete sumSliceData;
+	s32 Width = slices[0]->Width;
+	s32 Height = slices[0]->Height;
 
-	Width = slices[0]->Width;
-	Height = slices[0]->Height;
-
-	//#####################################################
-	//perform CT Value Consistency
-	CTValueConsistencyResult consistency_result= Amsd_CTValueConsistency(data,scene,slices);
-	//#####################################################
 	//apply radial window
 	//scene::IVolumeTexture* volume = dynamic_cast<scene::IVolumeTexture>(scene->getSpecificNodeById("IVolumeTexture"));
 	kk::scene::IVolumeTexture* volume = dynamic_cast<kk::scene::IVolumeTexture*>(scene->getSpecificNodeById("IVolumeTexture"));
@@ -173,15 +98,14 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene)
 		//debug
 		if(sliceForAmplitude->getMinValue()<0.0f)
 		{
+			MessageBoxA(NULL,"切片大小不一致","Error",0);
 			throw "切片大小不一致";
 		}
 		squareAmplitudes.push_back(sliceForAmplitude);
 	}
-	//clear slices
+
 	for(s32 i=0;i<(s32)slices.size();i++)
-	{
 		delete slices[i];
-	}
 	slices.clear();
 	
 	//average all nps image
@@ -204,7 +128,7 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene)
 		npsAverage->Data[x+y*Width] *= inverseDivideNumber;
 	}
 	}
-	//clear amplitude
+	
 	for(s32 i=0;i<(s32)squareAmplitudes.size();i++)
 		delete squareAmplitudes[i];
 	squareAmplitudes.clear();
@@ -474,9 +398,6 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene)
 	batchesPSF->addImage(imgMTF,core::rect<s32>(0,0,Width,Height));
 #endif
 	//release data
-	
-	if(MiddleSlice)
-		delete MiddleSlice;
 	if(PSF)
 		delete []PSF;
 	if(MTF)
@@ -487,8 +408,7 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene)
 		delete[] ERF_array_count;
 	if(ERF_array)
 		delete[] ERF_array;
-	
-
-return adjustedBox;
+	if(MiddleSlice)
+		delete MiddleSlice;
 }
 }

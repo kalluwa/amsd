@@ -1,5 +1,4 @@
-//created by kalluwa
-//2014/2/7
+//2015/2/7
 
 #include "COpenglVolumeTexture.h"
 #include <queue>
@@ -54,7 +53,7 @@ void COpenglVolumeTexture::loadVolumeFromFile(const char* fileName,int sizeX,int
 	Data = new f32[sizeVoxel];
 
 	//u8* DataShow = new u8[ sizeX*sizeY*sizeZ];
-	u8* DataShow = new u8[ size];
+	u8* DataShow = new u8[size];
 	FILE* fp = 0;//fopen(fileName,"r");
 	fopen_s(&fp,fileName,"r");
 	if(!fp)
@@ -74,6 +73,7 @@ void COpenglVolumeTexture::loadVolumeFromFile(const char* fileName,int sizeX,int
 	memcpy(DataShow,Data,sizeVoxel*4);
 	//close file
 	fclose(fp);
+	fp=NULL;
 
 	//find max value
 	float maxValue=0;

@@ -57,6 +57,7 @@ BEGIN_MESSAGE_MAP(CamsdView, CView)
 	ON_COMMAND(ID_BUTTON3, &CamsdView::OnTrianglePathLength)
 	ON_COMMAND(ID_BUTTON4, &CamsdView::OnNEQCalculation)
 	ON_COMMAND(ID_BUTTON6, &CamsdView::OnMetalUniformity)
+	ON_COMMAND(ID_BUTTON8, &CamsdView::OnAMSD_SSP)
 END_MESSAGE_MAP()
 
 // CamsdView 构造/析构
@@ -220,7 +221,7 @@ int CamsdView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	//memory leaks
-	//_CrtSetBreakAlloc(25792);//489为内存泄露块
+	//_CrtSetBreakAlloc(206513);//489为内存泄露块
 	// TODO:  在此添加您专用的创建代码
 	glInit();
 	app = new IApp();
@@ -549,6 +550,19 @@ void CamsdView::OnMetalUniformity()
 	event.type = ET_USER;
 	event.UserData.type = EUT_CALCULATION;
 	event.UserData.calType = ECT_METAL_UNIFORMITY;
+
+	app->OnEvent(event);
+	updateViewWindow();
+}
+
+
+void CamsdView::OnAMSD_SSP()
+{
+	// TODO: 在此添加命令处理程序代码
+	SEvent event;
+	event.type = ET_USER;
+	event.UserData.type = EUT_CALCULATION;
+	event.UserData.calType = ECT_SSP;
 
 	app->OnEvent(event);
 	updateViewWindow();

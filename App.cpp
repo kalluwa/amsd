@@ -13,6 +13,7 @@
 #include "Calculation/TrianglePathLength.h"
 #include "Calculation/NeqCalculation.h"
 #include "Calculation/MetalUniformity.h"
+#include "Calculation/Amsd_SSP.h"
 
 using namespace kk;
 using namespace Calculation;
@@ -51,7 +52,7 @@ bool keyCtrl=false;
 		// 756*656*252*4bytes = 484.3125MB and my video card memory is 492MB
 		volumeTexture = new kk::scene::COpenglVolumeTexture(driver,
 			//"F:\\CT\\data\\N42.45_A.raw",640,544,240,1.2f,1.2f,3.333f);//288 error
-			"F:\\CT\\N42.45.rcn",768,656,126,1.35f,1.35f,6.67f,0);//126);//,125);//125
+			"F:\\CT\\N42.45.rcn",768,656,126,1.35f,1.35f,6.67f,126);//,125);//125
 		scene->addNodeToRender(volumeTexture);
 
 		scene::ImageBatches* batches = new scene::ImageBatches(driver);
@@ -250,6 +251,16 @@ bool keyCtrl=false;
 				core::vector3df offset(-0.5f,-0.5f,-0.5f);
 				pickBox.MinEdge = offset+core::vector3df(tmpBox.MinEdge.X/(f32)volumeTexture->getVolumeSizeX(),tmpBox.MinEdge.Y/(f32)volumeTexture->getVolumeSizeY(),tmpBox.MinEdge.Z/(f32)volumeTexture->getVolumeSizeZ());
 				pickBox.MaxEdge = offset+core::vector3df(tmpBox.MaxEdge.X/(f32)volumeTexture->getVolumeSizeX(),tmpBox.MaxEdge.Y/(f32)volumeTexture->getVolumeSizeY(),tmpBox.MaxEdge.Z/(f32)volumeTexture->getVolumeSizeZ());
+				//debug end
+				if(boxData)
+				delete boxData;
+			}
+			break;
+		case Calculation::ECT_SSP:
+			{
+				Calculation::BoxData* boxData = new BoxData(volumeTexture->getVolumeData(),volumeTexture->getVolumeSizeX(),volumeTexture->getVolumeSizeY(),volumeTexture->getVolumeSizeZ(),volumeTexture->getSelectedBoundingBox());
+				Amsd_SSP_Calculation(boxData,scene);
+				
 				//debug end
 				if(boxData)
 				delete boxData;

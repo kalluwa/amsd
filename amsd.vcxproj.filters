@@ -288,6 +288,12 @@
     <ClInclude Include="Calculation\CTValueConsistency.h">
       <Filter>calculation</Filter>
     </ClInclude>
+    <ClInclude Include="Calculation\Amsd_SSP.h">
+      <Filter>calculation</Filter>
+    </ClInclude>
+    <ClInclude Include="Calculation\NEQ_NPS_Method2.h">
+      <Filter>calculation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="amsd.cpp">
@@ -393,6 +399,12 @@
       <Filter>alglib</Filter>
     </ClCompile>
     <ClCompile Include="Calculation\CTValueConsistency.cpp">
+      <Filter>calculation</Filter>
+    </ClCompile>
+    <ClCompile Include="Calculation\Amsd_SSP.cpp">
+      <Filter>calculation</Filter>
+    </ClCompile>
+    <ClCompile Include="Calculation\NEQ_NPS_Method2.cpp">
       <Filter>calculation</Filter>
     </ClCompile>
   </ItemGroup>

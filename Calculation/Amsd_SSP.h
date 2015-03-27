@@ -12,6 +12,6 @@
 namespace Calculation
 {
 
-extern void Amsd_SSP_Calculation(BoxData* data,ISceneManager* scene);
+extern void Amsd_SSP_Calculation(BoxData* data,kk::scene::ISceneManager* scene);
 }
 #endif

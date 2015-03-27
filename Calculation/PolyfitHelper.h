@@ -13,5 +13,7 @@ namespace Calculation
 
 	extern f32 getPolyfitCubicMiddleResult(f32* input,s32 sizeToFit);
 	extern f32 getPolyfitCubicDerivativeResult(f32* input,s32 sizeToFit);
+	extern bool getPolyfitLineResult(const core::array<f32>& inputMiddlePoints,core::array<f32>& outputMiddlePoints);
+	
 }
 #endif

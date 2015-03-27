@@ -53,7 +53,8 @@ CTValueConsistencyResult Amsd_CTValueConsistency(BoxData* data,scene::ISceneMana
 		}
 		sliceStdValues.push_back(stdSum);
 	}
-	
+
+	insideTheCircle.clear();
 	//then sort two array and get median values
 	sliceMeanValues.sort();
 	sliceStdValues.sort();

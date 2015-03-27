@@ -354,13 +354,18 @@ SliceData::SliceData(s32 width,s32 height)
 	memset(Data,0,sizeof(f32)*width*height);
 }
 
+SliceData::~SliceData()
+{
+	if(Data)
+		delete []Data;
+}
 SliceData::SliceData(f32* CTData,BoxData* boxData,s32 slicePos)
 {
 	core::aabbox3di box = boxData->Box;
 
 	Width = box.MaxEdge.X-box.MinEdge.X+1;
 	Height = box.MaxEdge.Y- box.MinEdge.Y+1;
-	Data = new f32[Width*Height];
+	Data = 0;//new f32[Width*Height];
 	s32 z= slicePos;
 	boxData->getSliceZ(Data,slicePos,Width,Height);
 	//for(s32 x=0;x<Width;x++)
@@ -385,6 +390,21 @@ bool SliceData::subSlice(SliceData* other)
 		for(s32 y= 0;y<Height;y++)
 		{
 			Data[x+y*Width] -=other->Data[x+y*Width];
+		}
+	}
+	return true;
+}
+
+bool SliceData::plusSlice(SliceData* other)
+{
+	if(Width != other->Width || Height != other->Height)
+		return false;
+
+	for(s32 x=0;x<Width;x++)
+	{
+		for(s32 y= 0;y<Height;y++)
+		{
+			Data[x+y*Width] +=other->Data[x+y*Width];
 		}
 	}
 	return true;
@@ -480,6 +500,10 @@ f32 SliceData::getPixelValue(s32 x,s32 y)
 	return Data[x+y*Width];
 };
 
+void SliceData::setPixelValue(s32 x,s32 y,f32 value)
+{
+	Data[x+y*Width]=value;
+}
 void SliceData::applyRadialWindow(f32 mmInXY)
 {
 	const f32 R = 148/2/mmInXY; //R in Voxel Count

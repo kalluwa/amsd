@@ -13,7 +13,8 @@ namespace Calculation
 		ECT_OBJ_LENGTH,
 		ECT_TRIANGLE_PATH_LENGTH,
 		ECT_NEQ_CALCULATION,
-		ECT_METAL_UNIFORMITY
+		ECT_METAL_UNIFORMITY,
+		ECT_SSP
 	};
 
 	class BoxData
@@ -96,10 +97,11 @@ namespace Calculation
 
 		SliceData():Data(0){}
 
-		~SliceData(){ if(Data) delete []Data; };
+		~SliceData();
 
 		//subtract
 		bool subSlice(SliceData* other);
+		bool plusSlice(SliceData* other);
 		//weighted center
 		f32 getMinValue();
 		core::vector2di getLocalCenter();
@@ -110,7 +112,7 @@ namespace Calculation
 		void resizeImage();
 		//get pixel
 		f32 getPixelValue(s32 x,s32 y);
-
+		void setPixelValue(s32 x,s32 y,f32 value);
 		f32* Data;
 		s32 Width, Height;
 		core::vector3di BasePos;

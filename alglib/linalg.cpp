@@ -8602,7 +8602,7 @@ COMMERCIAL EDITION OF ALGLIB:
 
 Input parameters:
     A       -   Cholesky decomposition of the matrix to be inverted:
-                A=U’*U or A = L*L'.
+                A=U?U or A = L*L'.
                 Output of  SPDMatrixCholesky subroutine.
     N       -   size of matrix A (optional) :
                 * if given, only principal NxN submatrix is processed  and
@@ -8696,7 +8696,7 @@ COMMERCIAL EDITION OF ALGLIB:
 
 Input parameters:
     A       -   Cholesky decomposition of the matrix to be inverted:
-                A=U’*U or A = L*L'.
+                A=U?U or A = L*L'.
                 Output of  SPDMatrixCholesky subroutine.
     N       -   size of matrix A (optional) :
                 * if given, only principal NxN submatrix is processed  and
@@ -9018,7 +9018,7 @@ COMMERCIAL EDITION OF ALGLIB:
 
 Input parameters:
     A       -   Cholesky decomposition of the matrix to be inverted:
-                A=U’*U or A = L*L'.
+                A=U?U or A = L*L'.
                 Output of  HPDMatrixCholesky subroutine.
     N       -   size of matrix A (optional) :
                 * if given, only principal NxN submatrix is processed  and
@@ -9112,7 +9112,7 @@ COMMERCIAL EDITION OF ALGLIB:
 
 Input parameters:
     A       -   Cholesky decomposition of the matrix to be inverted:
-                A=U’*U or A = L*L'.
+                A=U?U or A = L*L'.
                 Output of  HPDMatrixCholesky subroutine.
     N       -   size of matrix A (optional) :
                 * if given, only principal NxN submatrix is processed  and
@@ -10776,7 +10776,7 @@ void rmatrixinvupdatecolumn(real_2d_array &inva, const ae_int_t n, const ae_int_
 /*************************************************************************
 Inverse matrix update by the Sherman-Morrison formula
 
-The algorithm computes the inverse of matrix A+u*v’ by using the given matrix
+The algorithm computes the inverse of matrix A+u*v?by using the given matrix
 A^-1 and the vectors u and v.
 
 Input parameters:
@@ -39792,7 +39792,7 @@ COMMERCIAL EDITION OF ALGLIB:
 
 Input parameters:
     A       -   Cholesky decomposition of the matrix to be inverted:
-                A=U’*U or A = L*L'.
+                A=U?U or A = L*L'.
                 Output of  SPDMatrixCholesky subroutine.
     N       -   size of matrix A (optional) :
                 * if given, only principal NxN submatrix is processed  and
@@ -40044,7 +40044,7 @@ COMMERCIAL EDITION OF ALGLIB:
 
 Input parameters:
     A       -   Cholesky decomposition of the matrix to be inverted:
-                A=U’*U or A = L*L'.
+                A=U?U or A = L*L'.
                 Output of  HPDMatrixCholesky subroutine.
     N       -   size of matrix A (optional) :
                 * if given, only principal NxN submatrix is processed  and
@@ -43762,7 +43762,7 @@ void rmatrixinvupdatecolumn(/* Real    */ ae_matrix* inva,
 /*************************************************************************
 Inverse matrix update by the Sherman-Morrison formula
 
-The algorithm computes the inverse of matrix A+u*v’ by using the given matrix
+The algorithm computes the inverse of matrix A+u*v?by using the given matrix
 A^-1 and the vectors u and v.
 
 Input parameters:

@@ -103,6 +103,7 @@ public:
 	afx_msg void OnTrianglePathLength();
 	afx_msg void OnNEQCalculation();
 	afx_msg void OnMetalUniformity();
+	afx_msg void OnAMSD_SSP();
 };
 
 #ifndef _DEBUG  // amsdView.cpp 中的调试版本
