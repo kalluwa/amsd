@@ -3,7 +3,7 @@
 
 //#include "stdafx.h"
 #include "App.h"
-#include "Src/Core/core.h"
+#include "Src/Core/Core.h"
 #include "Src/EventTypes.h"
 #include "Src/Scene/COpenglVolumeTexture.h"
 #include "Src/Scene/ImageBatches.h"
@@ -28,7 +28,68 @@ kk::scene::IVolumeTexture* volumeTexture;
 f32* img=0;
 bool keyCtrl=false;
 
-	IApp::IApp(kk::video::EDriverType type)
+//reference: http://stackoverflow.com/questions/308276/c-call-constructor-from-constructor
+//no way to call construtor from constructor for c++03
+	IApp::IApp(kk::video::EDriverType type)  //test volume
+		:driver(0),scene(0)
+	{
+		//error:
+		//IApp(core::stringc("F:\\CT\\N42.45.rcn"),768,656,126,1.35f,1.35f,6.67f,0,type);
+		
+		switch(type)
+		{
+		case kk::video::EDT_OPENGL:
+			driver = kk::video::createOpenGLDriver(640,480);
+			break;
+		}
+		
+		init();
+
+		//add camera node
+		kk::scene::CSimpleCameraNode* simplecamera = new kk::scene::CSimpleCameraNode(driver,
+			kk::core::vector3df(-2,0,1),kk::core::vector3df(0,0,0),kk::core::vector3df(0,1,0));
+		scene->addCamera(simplecamera);
+		//nodes.push_back(simplecamera);
+
+		//volume node
+		core::stringc fileName("F:\\CT\\N42.45.rcn");
+		//<<- image is too large for my videocard-> result in showing nothing ->>
+		// 756*656*252*4bytes = 484.3125MB and my video card memory is 492MB
+		volumeTexture = new kk::scene::COpenglVolumeTexture(driver,
+			//"F:\\CT\\data\\N42.45_A.raw",640,544,240,1.2f,1.2f,3.333f);//288 error
+			fileName.c_str(),768,656,126,1.35f,1.35f,6.67f,126);//,125);//125
+		scene->addNodeToRender(volumeTexture);
+
+		scene::ImageBatches* batches = new scene::ImageBatches(driver);
+		scene->addNodeToRender(batches);
+		img = new f32[100*100];
+		s32 k=0;
+		for(s32 i=0;i<100;i++)
+		{
+			for(s32 j=0;j<100;j++)
+			{
+				//img[k++] = rand()/(float)RAND_MAX;
+				if(j<50&&i<50)
+					img[i*100+j]=1.0f;
+				else
+					img[i*100+j]=0.5f;
+				//img[k++]=1.0f;
+			}
+		}
+
+		//kk::scene::CImageOpenGL* imgToAdd = new kk::scene::CImageOpenGL(img,100,100);
+        //batches->addImage(imgToAdd,core::rect<s32>(0,0,100,100));
+		//kk::scene::CImageOpenGL* imgToAdd2 = new kk::scene::CImageOpenGL(img,100,100);
+		//batches->addImage(imgToAdd2,core::rect<s32>(100,0,100,100));
+		//set start pos
+		SEvent e;
+		e.type= ET_USER;
+		
+		simplecamera->OnEvent(e);
+	}
+
+	IApp::IApp(const kk::core::stringc& fileName,s32 sizeX,s32 sizeY,s32 sizeZ,
+		f32 mmX,f32 mmY,f32 mmZ,s32 offset,kk::video::EDriverType type)
 		:driver(0),scene(0)
 	{
 
@@ -52,7 +113,7 @@ bool keyCtrl=false;
 		// 756*656*252*4bytes = 484.3125MB and my video card memory is 492MB
 		volumeTexture = new kk::scene::COpenglVolumeTexture(driver,
 			//"F:\\CT\\data\\N42.45_A.raw",640,544,240,1.2f,1.2f,3.333f);//288 error
-			"F:\\CT\\N42.45.rcn",768,656,126,1.35f,1.35f,6.67f,126);//,125);//125
+			fileName.c_str(),sizeX,sizeY,sizeZ,mmX,mmY,mmZ,offset);//,125);//125
 		scene->addNodeToRender(volumeTexture);
 
 		scene::ImageBatches* batches = new scene::ImageBatches(driver);

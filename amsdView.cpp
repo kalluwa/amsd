@@ -38,6 +38,7 @@ BEGIN_MESSAGE_MAP(CamsdView, CView)
 	ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CamsdView::OnFilePrintPreview)
+	ON_COMMAND(ID_FILE_OPEN,&CamsdView::OnFileOpen)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
 	ON_WM_CREATE()
@@ -86,7 +87,167 @@ BOOL CamsdView::PreCreateWindow(CREATESTRUCT& cs)
 	cs.style |= (WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
 	return CView::PreCreateWindow(cs);
 }
+//参数设计对话框####################################################
+// 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
+class CParametersDlg : public CDialogEx
+{
+public:
+	CParametersDlg();
+
+// 对话框数据
+	enum { IDD = IDD_DIALOG_PARAMETERS };
+public:
+	s32 SizeX,SizeY,SizeZ;
+	f64 DistanceX,DistanceY,DistanceZ;
+	s32 DistanceOffsetZ;
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
+// 实现
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+protected:
+	DECLARE_MESSAGE_MAP()
+};
+
+CParametersDlg::CParametersDlg() : CDialogEx(CParametersDlg::IDD)
+{
+	
+}
+
+BOOL CParametersDlg::OnInitDialog()
+{
+	CDialog::OnInitDialog();
+	
+	//GetDlgItem(txtSizeX)->SetWindowTextW(L"768");
+	//GetDlgItem(txtSizeY)->SetWindowTextW(L"656");
+	//GetDlgItem(txtSizeZ)->SetWindowTextW(L"126");
+
+	//GetDlgItem(txtDistanceX)->SetWindowTextW(L"1.35");
+	//GetDlgItem(txtDistanceY)->SetWindowTextW(L"1.35");
+	//GetDlgItem(txtDistanceZ)->SetWindowTextW(L"6.67");
+
+	//GetDlgItem(txtOffsetDistanceZ)->SetWindowTextW(L"0");
+	
+	SizeX = 768;
+	SizeY = 656;
+	SizeZ = 126;
+
+	DistanceX =1.35;
+	DistanceY =1.35;
+	DistanceZ =6.67;
+
+	DistanceOffsetZ = 0;
+	//write initial data to control
+	//reference:http://blog.csdn.net/hfnhzpe/article/details/2474889
+	UpdateData(false);
+
+	return TRUE;
+}
+
+void CParametersDlg::OnOK()
+{
+	//get the changed data
+	UpdateData(true);
+
+	CDialogEx::OnOK();
+}
+void CParametersDlg::DoDataExchange(CDataExchange* pDX)
+{
+	CDialogEx::DoDataExchange(pDX);
+	//reference:http://bbs.csdn.net/topics/300059826
+	DDX_Text(pDX,txtSizeX,SizeX);
+	DDX_Text(pDX,txtSizeY,SizeY);
+	DDX_Text(pDX,txtSizeZ,SizeZ);
+
+	DDX_Text(pDX,txtDistanceX,DistanceX);
+	DDX_Text(pDX,txtDistanceY,DistanceY);
+	DDX_Text(pDX,txtDistanceZ,DistanceZ);
+
+	DDX_Text(pDX,txtOffsetDistanceZ,DistanceOffsetZ);
+	
+}
+
+BEGIN_MESSAGE_MAP(CParametersDlg, CDialogEx)
+END_MESSAGE_MAP()
+
+
+//参数设计对话框####################################################
+
+void CamsdView::OnFileOpen()
+{
+	//std::cout<<"he";
+	//reference:<<CAD应用程序开发详解-visual c++与OpenGL综合应用>>p286
+	CFileDialog dlg(TRUE,L"CT Data",NULL,
+		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+		L"CT元数据(*.*)|*.*",NULL);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		//reference:http://stackoverflow.com/questions/859304/convert-cstring-to-const-char
+		//get the filename
+		CString fileNameW = dlg.GetPathName();
+		CStringA fileNameA(fileNameW);
+		core::stringc fileName =((const char *) fileNameA);
+		
+
+		s32 sizeX,sizeY,sizeZ;
+		f64 mmX,mmY,mmZ;
+		s32 offset;
+		//get parameters
+		//CAboutDlg aboutDlg;
+		CParametersDlg paramsDlg;
+		if(paramsDlg.DoModal() == IDOK)
+		{
+		//load CT Data
+		if(app)
+			delete app;
+			/*
+			CString inputText;
+			//parse text to int
+
+			//reference:http://www.cnblogs.com/nickyan/archive/2011/07/15/2107616.html
+			paramsDlg.GetDlgItem(txtSizeX)->GetWindowTextW(inputText);
+			sizeX = _ttoi(inputText);
+			paramsDlg.GetDlgItem(txtSizeY)->GetWindowTextW(inputText);
+			sizeY = _ttoi(inputText);
+			paramsDlg.GetDlgItem(txtSizeZ)->GetWindowTextW(inputText);
+			sizeZ = _ttoi(inputText);
+
+			//parse string to float
+
+			//reference:http://stackoverflow.com/questions/5788772/convert-cstring-to-float-in-mfc
+			paramsDlg.GetDlgItem(txtDistanceX)->GetWindowTextW(inputText);
+			mmX = _ttof(inputText);
+			paramsDlg.GetDlgItem(txtDistanceY)->GetWindowTextW(inputText);
+			mmY = _ttof(inputText);
+			paramsDlg.GetDlgItem(txtDistanceZ)->GetWindowTextW(inputText);
+			mmZ = _ttof(inputText);
+
+			//offset
+			paramsDlg.GetDlgItem(txtOffsetDistanceZ)->GetWindowTextW(inputText);
+			offset =_ttoi(inputText);
+			*/
+
+			sizeX = paramsDlg.SizeX;
+			sizeY = paramsDlg.SizeY;
+			sizeZ = paramsDlg.SizeZ;
+
+			mmX = paramsDlg.DistanceX;
+			mmY = paramsDlg.DistanceY;
+			mmZ = paramsDlg.DistanceZ;
+
+			offset = paramsDlg.DistanceOffsetZ;
+			glInit();
+			app = new IApp(fileName,sizeX,sizeY,sizeZ,(f32)mmX,(f32)mmY,(f32)mmZ,offset);
+			glResize(Width,Height);
+			//std::cout<<fileName.c_str();
+		}
+		//aboutDlg.DoModal();
+		
+	}
+
+}
 // CamsdView 绘制
 
 void CamsdView::OnDraw(CDC* /*pDC*/)
@@ -221,7 +382,7 @@ int CamsdView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	//memory leaks
-	//_CrtSetBreakAlloc(206513);//489为内存泄露块
+	//_CrtSetBreakAlloc(489);//489为内存泄露块
 	// TODO:  在此添加您专用的创建代码
 	glInit();
 	app = new IApp();
@@ -259,7 +420,7 @@ void CamsdView::glResize(int x,int y)
 	SEvent event;
 	event.type = ET_USER;
 	event.UserData.type = EUT_RESIZE;
-	event.UserData.Size.width = x;;
+	event.UserData.Size.width = x;
 	event.UserData.Size.height = y;
 
 	app->OnEvent(event);
@@ -309,6 +470,8 @@ void CamsdView::OnSize(UINT nType, int cx, int cy)
 {
 	CView::OnSize(nType, cx, cy);
 
+	Width = cx;
+	Height = cy;
 	// TODO: 在此处添加消息处理程序代码
 	VERIFY(wglMakeCurrent(m_hDC,m_hRC));
 	glResize(cx,cy);

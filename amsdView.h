@@ -61,7 +61,7 @@ protected:
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
 	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
 	virtual void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo);
-
+	virtual void OnFileOpen();
 // й╣ож
 public:
 	virtual ~CamsdView();
@@ -74,6 +74,7 @@ protected:
 	HGLRC m_hRC;
 	HDC m_hDC;
 
+	int Width,Height;
 	IApp* app;
 	//for key
 	bool keyShift,keyControl;

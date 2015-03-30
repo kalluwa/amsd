@@ -15,11 +15,16 @@
 #include "Src/Scene/CSceneManager.h"
 #include "Calculation/calcHelper.h"
 
+using namespace kk;
+using namespace core;
 class IApp
 {
 public:
 	//constructor
-	IApp(kk::video::EDriverType type=kk::video::EDT_OPENGL);
+	IApp(kk::video::EDriverType type=video::EDT_OPENGL);
+
+	IApp(const kk::core::stringc& fileName,s32 sizeX,s32 sizeY,s32 sizeZ,
+		f32 mmX,f32 mmY,f32 mmZ,s32 offset,kk::video::EDriverType type= video::EDT_OPENGL);
 	//deconstructor
 	virtual ~IApp();
 

@@ -177,6 +177,8 @@ void resize(int w, int h)
 void COpenglVolumeTexture::render()
 {
 	resize(Driver->getViewport().X,Driver->getViewport().Y);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
 	glTranslatef(-0.5f,-0.5f,-0.5f);
 	glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, framebuffer);
 	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, renderbuffer);
@@ -185,6 +187,7 @@ void COpenglVolumeTexture::render()
 	raycasting_pass();
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	render_buffer_to_screen();
+	glPopMatrix();
 }
 
 void COpenglVolumeTexture::reshape_ortho(int w, int h)
