@@ -98,7 +98,7 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene)
 			BaseLinePoss.push_back(i);
 		}
 	}
-	for(s32 i=0;i<BaseLinePoss.size();i+=2)
+	for(s32 i=0;i<(s32)BaseLinePoss.size();i+=2)
 	{
 		//find max value in this range
 		f32 maxValue = CTSliceMaxCTValues[BaseLinePoss[i]];
@@ -277,7 +277,7 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene)
 		//     line1   line2
 		//     /		\
 		//    /			 \
-		//   /			  \
+		//   /			  \     end
 		line1_control.push_back(controlSliceData->getPixelValue(centerXPos+i,centerYPos+i));
 		line1_control.push_back(controlSliceData->getPixelValue(centerXPos-i,centerYPos-i));
 
@@ -318,7 +318,7 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene)
 		delete controlSliceData;
 //########################################
 	//w pin
-	f32 wuPinStart=-1,wuPinEnd=-1;
+	s32 wuPinStart=-1,wuPinEnd=-1;
 	for(s32 i=realEnd;i<(s32)passedVoxelCount.size();i++)
 	{
 		f32 sliceMaxValue = data->getSliceZMaxValue(data->Box.MinEdge.Z+i);
