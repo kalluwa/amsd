@@ -8,7 +8,7 @@ namespace Calculation
 {
 using namespace kk;
 
-CTValueConsistencyResult Amsd_CTValueConsistency(BoxData* data,scene::ISceneManager* scene,const core::array<SliceData*>& slices)
+CTValueConsistencyResult Amsd_CTValueConsistency(BoxData* data,scene::ISceneManager* scene,kk::io::IWriteFile* Output,const core::array<SliceData*>& slices)
 {
 	//get volume texture
 	scene::IVolumeTexture* volume = dynamic_cast<scene::IVolumeTexture*>(scene->getSpecificNodeById("IVolumeTexture"));
@@ -61,8 +61,15 @@ CTValueConsistencyResult Amsd_CTValueConsistency(BoxData* data,scene::ISceneMana
 	//organize data
 	CTValueConsistencyResult result;
 	result.Mean_MedianValue = sliceMeanValues[sliceMeanValues.size()/2];
-	result.Std_MedianValue = sliceStdValues[sliceStdValues.size()/2];
+	result.Mean_StdValue = sliceStdValues[sliceStdValues.size()/2];
 
+	Output->writeString(core::stringc("\n\n指标三:\nCT值一致性:\n"));
+	Output->writeString(core::stringc("多个切片均值的中值="));
+	Output->writeSingle(result.Mean_MedianValue);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("多个切片标准差的中值="));
+	Output->writeSingle(result.Mean_StdValue);
+	Output->writeEmptyLine();
 	//for stdValues
 	f32 meanOfMeanArray=0.0f;
 	f32 meanOfStdArray=0.0f;
@@ -86,6 +93,12 @@ CTValueConsistencyResult Amsd_CTValueConsistency(BoxData* data,scene::ISceneMana
 	result.Std_MedianValue = stdOfMeanArray;
 	result.Std_StdValue = stdOfStdArray;
 
+	Output->writeString(core::stringc("多个切片均值的标准差="));
+	Output->writeSingle(stdOfMeanArray);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("多个切片标准差的标准差="));
+	Output->writeSingle(stdOfStdArray);
+	Output->writeEmptyLine();
 	return result;
 }
 }

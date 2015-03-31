@@ -13,7 +13,7 @@ namespace Calculation
 {
 	
 	//just static function header
-void Amsd_LengthAccuracy(BoxData* data,kk::scene::ISceneManager* scene)
+void Amsd_LengthAccuracy(BoxData* data,kk::scene::ISceneManager* scene,kk::io::IWriteFile* Output)
 {
 	f32* cornerImage=0;
 	s32 width=0;
@@ -128,6 +128,7 @@ void Amsd_LengthAccuracy(BoxData* data,kk::scene::ISceneManager* scene)
 	
 	f32 Length = sqrtf((zC1-zC2)*(zC1-zC2)+(xC1-xC2)*(xC1-xC2));
 	f32 alpha = asinf((xC2-xC1)/Length);
+	alpha = alpha * 180/3.1415927f;
 
 	f32 xCenter = (xC1+xC2)*0.5f;
 	f32 zCenter = (zC1+zC2)*0.5f;
@@ -168,6 +169,23 @@ void Amsd_LengthAccuracy(BoxData* data,kk::scene::ISceneManager* scene)
 
 	f32 yCenter = (yC1+yC2)*0.5f;
 	f32 value = Length / 609.6f;//actual length = 609.6mm
+
+	Output->writeString(core::stringc("\n\n指标一:\n长度准确度:\n"));
+	Output->writeString(core::stringc("XCenter="));
+	Output->writeSingle(xCenter);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("ZCenter="));
+	Output->writeSingle(zCenter);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("总长度="));//alpha
+	Output->writeSingle(Length);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("角度="));//alpha
+	Output->writeSingle(alpha);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("总长度比率="));
+	Output->writeSingle(value);
+	Output->writeEmptyLine();
 #if 1 //Debug
 	kk::scene::ImageBatches* batches = dynamic_cast<kk::scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
 	

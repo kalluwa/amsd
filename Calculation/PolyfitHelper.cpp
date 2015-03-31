@@ -24,7 +24,7 @@ namespace Calculation
 			streamX<<","<<i;
 		}
 		streamX<<"]";
-		char* tmpCharsX = new char[(u32)streamX.tellp()+1];
+		char* tmpCharsX = new char[(u32)streamX.tellp()+10];
 		streamX>>tmpCharsX;
 		string inputX(tmpCharsX);
 		if(tmpCharsX)

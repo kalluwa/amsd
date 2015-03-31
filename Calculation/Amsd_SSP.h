@@ -6,12 +6,13 @@
 #include "../Src/Core/core.h"
 #include "../Src/Scene/ISceneManager.h"
 #include "../Src/Scene/IVolumeTexture.h"
+#include "../Src/IO/IWriteFile.h"
 //debug
 #include <Windows.h>
 
 namespace Calculation
 {
 
-extern void Amsd_SSP_Calculation(BoxData* data,kk::scene::ISceneManager* scene);
+extern void Amsd_SSP_Calculation(BoxData* data,kk::scene::ISceneManager* scene,kk::io::IWriteFile* Output);
 }
 #endif

@@ -13,6 +13,8 @@
 
 #include "CalcHelper.h"
 #include "../Src/scene/ISceneManager.h"
+#include "../Src/io/IWriteFile.h"
+
 namespace Calculation
 {
 	struct CTValueConsistencyResult
@@ -23,6 +25,6 @@ namespace Calculation
 		f32 Std_MedianValue;
 		f32 Std_StdValue;
 	};
-	extern CTValueConsistencyResult Amsd_CTValueConsistency(BoxData* data,kk::scene::ISceneManager*scene,const core::array<SliceData*>& slices);
+	extern CTValueConsistencyResult Amsd_CTValueConsistency(BoxData* data,kk::scene::ISceneManager*scene,kk::io::IWriteFile* Output,const core::array<SliceData*>& slices);
 }
 #endif

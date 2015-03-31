@@ -53,6 +53,12 @@ void ImageBatches::render()
 
 void ImageBatches::clearAllTextures()
 {
+	for(s32 i=Images.size()-1;i>=0;i--)
+	{
+		//if(Images[i].img)
+		delete Images[i].img;
+		Images[i].img = 0;
+	}
 	Images.clear();
 }
 void ImageBatches::OnEvent(SEvent e)

@@ -14,6 +14,8 @@
 #include "Calculation/NeqCalculation.h"
 #include "Calculation/MetalUniformity.h"
 #include "Calculation/Amsd_SSP.h"
+//write to file
+#include "Src/IO/CWriteFileW.h"
 
 using namespace kk;
 using namespace Calculation;
@@ -28,6 +30,7 @@ kk::scene::IVolumeTexture* volumeTexture;
 f32* img=0;
 bool keyCtrl=false;
 
+io::IWriteFile* Output;
 //reference: http://stackoverflow.com/questions/308276/c-call-constructor-from-constructor
 //no way to call construtor from constructor for c++03
 	IApp::IApp(kk::video::EDriverType type)  //test volume
@@ -50,6 +53,21 @@ bool keyCtrl=false;
 			kk::core::vector3df(-2,0,1),kk::core::vector3df(0,0,0),kk::core::vector3df(0,1,0));
 		scene->addCamera(simplecamera);
 		//nodes.push_back(simplecamera);
+
+		//test file append
+		//io::IWriteFile* file = new io::CWriteFileW("hello.txt",false,true);
+		//int A[]={1,2,3,4,5};
+		//file->writeString(core::stringc("ÎÄ±¾²âÊÔ"));
+		//file->writeEmptyLine();
+		//file->writeInt(100);
+		//file->writeEmptyLine();
+		//file->writeSingle(4.3f);
+		//file->writeEmptyLine();
+		//file->writeDouble(4.34);
+		//file->writeEmptyLine();
+		//file->writeArrayInt(A,5,' ');
+		//file->closeFile();
+		//delete file;
 
 		//volume node
 		//core::stringc fileName("F:\\CT\\N42.45.rcn");
@@ -162,11 +180,17 @@ bool keyCtrl=false;
 		}
 		if(img)
 			delete []img;
+		//remove output file handle
+		if(Output)
+			delete Output;
 	}
 	void IApp::init()
 	{
 		scene = new kk::scene::CSceneManager();
 		scene->initEnvironment();
+
+		//output
+		Output = new io::CWriteFileW("OutputResult.txt");
 	}
 
 	
@@ -276,7 +300,7 @@ bool keyCtrl=false;
 					volumeTexture->getVolumeSizeY(),volumeTexture->getVolumeSizeZ(),
 					volumeTexture->getSelectedBoundingBox());
 				
-				Amsd_LengthAccuracy(boxData,scene);
+				Amsd_LengthAccuracy(boxData,scene,Output);
 
 				if(boxData)
 				delete boxData;
@@ -285,7 +309,7 @@ bool keyCtrl=false;
 		case Calculation::ECT_TRIANGLE_PATH_LENGTH:
 			{
 				Calculation::BoxData* boxData = new BoxData(volumeTexture->getVolumeData(),volumeTexture->getVolumeSizeX(),volumeTexture->getVolumeSizeY(),volumeTexture->getVolumeSizeZ(),volumeTexture->getSelectedBoundingBox());
-				TrianglePathLength(boxData,scene);
+				TrianglePathLength(boxData,scene,Output);
 				
 				if(boxData)
 				delete boxData;
@@ -294,7 +318,7 @@ bool keyCtrl=false;
 		case Calculation::ECT_NEQ_CALCULATION:
 			{
 				Calculation::BoxData* boxData = new BoxData(volumeTexture->getVolumeData(),volumeTexture->getVolumeSizeX(),volumeTexture->getVolumeSizeY(),volumeTexture->getVolumeSizeZ(),volumeTexture->getSelectedBoundingBox());
-				core::aabbox3di tmpBox = Amsd_NEQCalculation(boxData,scene);
+				core::aabbox3di tmpBox = Amsd_NEQCalculation(boxData,scene,Output);
 				//debug
 				core::vector3df offset(-0.5f,-0.5f,-0.5f);
 				pickBox.MinEdge = offset+core::vector3df(tmpBox.MinEdge.X/(f32)volumeTexture->getVolumeSizeX(),tmpBox.MinEdge.Y/(f32)volumeTexture->getVolumeSizeY(),tmpBox.MinEdge.Z/(f32)volumeTexture->getVolumeSizeZ());
@@ -307,7 +331,7 @@ bool keyCtrl=false;
 		case Calculation::ECT_METAL_UNIFORMITY:
 			{
 				Calculation::BoxData* boxData = new BoxData(volumeTexture->getVolumeData(),volumeTexture->getVolumeSizeX(),volumeTexture->getVolumeSizeY(),volumeTexture->getVolumeSizeZ(),volumeTexture->getSelectedBoundingBox());
-				core::aabbox3di tmpBox = Amsd_MetalUniformity(boxData,scene);
+				core::aabbox3di tmpBox = Amsd_MetalUniformity(boxData,scene,Output);
 				//debug
 				core::vector3df offset(-0.5f,-0.5f,-0.5f);
 				pickBox.MinEdge = offset+core::vector3df(tmpBox.MinEdge.X/(f32)volumeTexture->getVolumeSizeX(),tmpBox.MinEdge.Y/(f32)volumeTexture->getVolumeSizeY(),tmpBox.MinEdge.Z/(f32)volumeTexture->getVolumeSizeZ());
@@ -320,7 +344,7 @@ bool keyCtrl=false;
 		case Calculation::ECT_SSP:
 			{
 				Calculation::BoxData* boxData = new BoxData(volumeTexture->getVolumeData(),volumeTexture->getVolumeSizeX(),volumeTexture->getVolumeSizeY(),volumeTexture->getVolumeSizeZ(),volumeTexture->getSelectedBoundingBox());
-				Amsd_SSP_Calculation(boxData,scene);
+				Amsd_SSP_Calculation(boxData,scene,Output);
 				
 				//debug end
 				if(boxData)

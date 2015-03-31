@@ -16,8 +16,8 @@ CSceneManager::CSceneManager()
 //deconstructor
 CSceneManager::~CSceneManager()
 {
-	s32 lastIndex = Nodes.size()-1;
-	for(s32 i =lastIndex ;i>=0;i--)
+	s32 lastIndex = (s32)Nodes.size()-1;
+	for(s32 i =lastIndex;i>=0;i--)
 	{
 		if(Nodes[i])
 		delete Nodes[i];

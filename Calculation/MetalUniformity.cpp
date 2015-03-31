@@ -20,7 +20,7 @@ in this function
 we need to figure out 3 parameters:Sout & MTF & NPS
 they are 3 main part in the following code
 */
-core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene)
+core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene,kk::io::IWriteFile* Output)
 {
 //pre process
 //remove extra part shold be done in volumeTexture class
@@ -78,7 +78,7 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene)
 
 	//we use threshold=0.35 to remove volxel which isnot belong to metal
 	f32 thresholdToEliminateActal = 0.35;
-	//then find 4 peaks
+	//then we need to find 4 peaks
 	core::array<s32> Peaks;
 	core::array<f32> BaseLinePoss;
 	//debug
@@ -174,11 +174,22 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene)
 		if(metalSlice)
 			delete metalSlice;
 	}
+	Output->writeString(core::stringc("\n\n指标五:\n金属:\n：从左至右依次是 \
+									  金属Al Cu Sn Pb和非金属\n"));
+
 	//normalize all metal mean and std
 	for(s32 i=0;i<(s32)metalMeansAndStds.size();i+=2)
 	{
 		metalMeansAndStds[i] /= metalMeansAndStds[metalMeansAndStds.size()-2];
 		metalMeansAndStds[i+1] /= metalMeansAndStds[metalMeansAndStds.size()-1];
+		
+		Output->writeString(core::stringc("均值比="));
+		Output->writeSingle(metalMeansAndStds[i]);
+		Output->writeEmptyLine();
+		Output->writeString(core::stringc("方差比="));
+		Output->writeSingle(metalMeansAndStds[i+1]);
+		Output->writeEmptyLine();
+
 		f32 debugMean=metalMeansAndStds[i];
 		f32 debugStd = metalMeansAndStds[i+1];
 		s32 ki=0;
@@ -199,6 +210,13 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene)
 	f32 meanValue_Aluminum = rawArray_Aluminum->getMeanValue();
 	f32 stdValue_Aluminum = rawArray_Aluminum->getStdValue();
 	
+	Output->writeEmptyLine();	
+	Output->writeString(core::stringc("Al的均值="));
+	Output->writeSingle(meanValue_Aluminum);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("Al的标准差"));
+	Output->writeSingle(stdValue_Aluminum);
+	Output->writeEmptyLine();
 
 	delete rawArray_Aluminum;
 	aluminumVoxels.clear();
@@ -295,6 +313,26 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene)
 	f32 peakVariation_Line2_control = rawArray_Line2_control->getMaxValue()-rawArray_Line2_control->getMinValue();
 	delete rawArray_Line2_control;
 
+	Output->writeString(core::stringc("\n\n指标六：\n不带金属的控制区域:\n"));
+	Output->writeString(core::stringc("直线1上的体素的均值:\n"));
+	Output->writeSingle(meanValue_Line1_control);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("直线1上的体素的标准差:\n"));
+	Output->writeSingle(stdValue_Line1_control);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("直线1上的体素的峰值变化:\n"));
+	Output->writeSingle(peakVariation_Line1_control);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("直线2上的体素的均值:\n"));
+	Output->writeSingle(meanValue_Line2_control);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("直线2上的体素的标准差:\n"));
+	Output->writeSingle(stdValue_Line2_control);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("直线2上的体素的峰值变化:\n"));
+	Output->writeSingle(peakVariation_Line2_control);
+	Output->writeEmptyLine();
+
 	line1_control.clear();
 	line2_control.clear();
 	//roi area
@@ -312,6 +350,16 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene)
 	f32 stdValue_ROI_control = rawArray_Roi_control->getStdValue();
 	f32 peakVariation_ROI_control = rawArray_Roi_control->getMaxValue()-rawArray_Roi_control->getMinValue();
 	delete rawArray_Line2_control;
+
+	Output->writeString(core::stringc("ROI区域上的体素的均值:\n"));
+	Output->writeSingle(meanValue_ROI_contorl);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("ROI区域上的体素的标准差:\n"));
+	Output->writeSingle(stdValue_ROI_control);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("ROI区域上的体素的峰值变化:\n"));
+	Output->writeSingle(peakVariation_ROI_control);
+	Output->writeEmptyLine();
 
 	roiAreaControl.clear();
 	if(controlSliceData)
@@ -398,6 +446,7 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene)
 			}
 		}
 	}
+	
 	if(wuPinMask)
 		delete[]wuPinMask;
 
@@ -475,6 +524,26 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene)
 	f32 stdValue_Line2 = rawArray_Line2->getStdValue();
 	f32 peakVariation_Line2_Wu = rawArray_Line2->getMaxValue()-rawArray_Line2->getMinValue();
 	delete rawArray_Line2;
+
+	Output->writeString(core::stringc("\n\n金属钨区域:\n"));
+	Output->writeString(core::stringc("直线1上的体素的均值:\n"));
+	Output->writeSingle(meanValue_Line1);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("直线1上的体素的标准差:\n"));
+	Output->writeSingle(stdValue_Line1);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("直线1上的体素的峰值变化:\n"));
+	Output->writeSingle(peakVariation_Line1_wu);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("直线2上的体素的均值:\n"));
+	Output->writeSingle(meanValue_Line2);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("直线2上的体素的标准差:\n"));
+	Output->writeSingle(stdValue_Line2);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("直线2上的体素的峰值变化:\n"));
+	Output->writeSingle(peakVariation_Line2_Wu);
+	Output->writeEmptyLine();
 	//ROI[rectangle]
 	s32 wuPinMinX = max(WuMiddlePoints[0].X,WuMiddlePoints[3].X);
 	s32 wuPinMinY = max(WuMiddlePoints[0].Y,WuMiddlePoints[1].Y);
@@ -506,6 +575,16 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene)
 
 	wuRoiData.clear();
 	WuMiddlePoints.clear();
+
+	Output->writeString(core::stringc("ROI区域上的体素的均值:\n"));
+	Output->writeSingle(meanValue_ROI_wu);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("ROI区域上的体素的标准差:\n"));
+	Output->writeSingle(stdValue_ROI_wu);
+	Output->writeEmptyLine();
+	Output->writeString(core::stringc("ROI区域上的体素的峰值变化:\n"));
+	Output->writeSingle(peakVariation_ROI_Wu);
+	Output->writeEmptyLine();
 #if 1 // for debug
 	
 	//char tm[50];
@@ -551,7 +630,8 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene)
 	BaseLinePoss.clear();
 	CTSliceMaxCTValues.clear();
 	Peaks.clear();
-
+	if(wuSliceData)
+		delete wuSliceData;
 
 return adjustedBox;
 }

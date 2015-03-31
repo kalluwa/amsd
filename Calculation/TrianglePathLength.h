@@ -6,10 +6,11 @@
 #include "CalcHelper.h"
 #include "../Src/Core/Core.h"
 #include "../Src/scene/ISceneManager.h"
+#include "../src/io/iWriteFile.h"
 
 namespace Calculation
 {
-extern void TrianglePathLength(BoxData* data,kk::scene::ISceneManager* scene);
+extern void TrianglePathLength(BoxData* data,kk::scene::ISceneManager* scene,kk::io::IWriteFile* Output);
 }
 
 

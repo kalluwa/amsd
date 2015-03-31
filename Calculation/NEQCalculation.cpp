@@ -26,7 +26,7 @@ in this function
 we need to figure out 3 parameters:Sout & MTF & NPS
 they are 3 main part in the following code
 */
-core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene)
+core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene,kk::io::IWriteFile* Output)
 {
 	//make the rectangle larger to contain every pixel inside the ball
 	s32 enlargeNumber = abs(data->Box.getExtent().X - data->Box.getExtent().Y);
@@ -101,7 +101,7 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene)
 
 	//###########################################
 	//using NPS method 2
-	Amsd_NEQ_NPS_UsingMethod2(data,scene,adjustedBox);
+	Amsd_NEQ_NPS_UsingMethod2(data,scene,Output,adjustedBox);
 	//###########################################
 
 	SliceData* MiddleSlice=0;
@@ -145,7 +145,7 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene)
 
 	//#####################################################
 	//perform CT Value Consistency
-	CTValueConsistencyResult consistency_result= Amsd_CTValueConsistency(data,scene,slices);
+	CTValueConsistencyResult consistency_result= Amsd_CTValueConsistency(data,scene,Output,slices);
 	//#####################################################
 	//apply radial window
 	//scene::IVolumeTexture* volume = dynamic_cast<scene::IVolumeTexture>(scene->getSpecificNodeById("IVolumeTexture"));
@@ -467,7 +467,8 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene)
 		//MTF[i] = (MTF[i] - MTF_minValue)*MTF_inverseScale;
 		MTF[i] /= MTF[0];
 	}
-	
+	Output->writeString(core::stringc("\n\nÖ¸±êËÄ:\nNEQ:"));
+	Output->writeArraySingle(MTF,MTF_count,' ');
 #ifdef _DEBUG
 	scene::ImageBatches* batches = dynamic_cast<scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
 	scene::CImageOpenGL* imgMTF = new scene::CImageOpenGL(MTF,MTF_count,1,true);

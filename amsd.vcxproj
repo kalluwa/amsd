@@ -170,6 +170,8 @@
     <ClInclude Include="Src\Driver\EDriverType.h" />
     <ClInclude Include="Src\Driver\IVideoDriver.h" />
     <ClInclude Include="Src\EventTypes.h" />
+    <ClInclude Include="Src\IO\CWriteFileW.h" />
+    <ClInclude Include="Src\IO\IWriteFile.h" />
     <ClInclude Include="src\scene\CImageOpenGL.h" />
     <ClInclude Include="Src\Scene\COpenglVolumeTexture.h" />
     <ClInclude Include="Src\Scene\CSceneManager.h" />
@@ -213,6 +215,7 @@
     <ClCompile Include="CalendarBar.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="Src\Driver\COpenGLDriver.cpp" />
+    <ClCompile Include="Src\IO\CWriteFileW.cpp" />
     <ClCompile Include="Src\Scene\CImageOpenGL.cpp" />
     <ClCompile Include="Src\Scene\COpenglVolumeTexture.cpp" />
     <ClCompile Include="Src\Scene\CSceneManager.cpp" />

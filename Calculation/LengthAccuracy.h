@@ -6,11 +6,11 @@
 #include "../Src/Core/core.h"
 #include "calcHelper.h"
 #include "../Src/scene/IScenemanager.h"
-
+#include "../Src/io/IWriteFile.h"
 namespace Calculation
 {
 	using namespace kk;
 	//just static function header
-	extern void Amsd_LengthAccuracy(BoxData* data,kk::scene::ISceneManager* scene);
+	extern void Amsd_LengthAccuracy(BoxData* data,kk::scene::ISceneManager* scene,kk::io::IWriteFile* Output);
 }//end namespace
 #endif // end define

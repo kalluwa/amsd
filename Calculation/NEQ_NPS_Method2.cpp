@@ -11,7 +11,7 @@
 
 namespace Calculation
 {
-void Amsd_NEQ_NPS_UsingMethod2(BoxData* data,kk::scene::ISceneManager* scene,const core::aabbox3di& adjustedBox)
+void Amsd_NEQ_NPS_UsingMethod2(BoxData* data,kk::scene::ISceneManager* scene,kk::io::IWriteFile* Output,const core::aabbox3di& adjustedBox)
 {
 	SliceData* MiddleSlice=0;
 //2 NPS
@@ -391,13 +391,16 @@ void Amsd_NEQ_NPS_UsingMethod2(BoxData* data,kk::scene::ISceneManager* scene,con
 		//MTF[i] = (MTF[i] - MTF_minValue)*MTF_inverseScale;
 		MTF[i] /= MTF[0];
 	}
-	
+	Output->writeString(core::stringc("\n\n指标四:\nNEQ 方法2(MTF):"));
+	Output->writeArraySingle(MTF,MTF_count,' ');
 #ifdef _DEBUG
 	scene::ImageBatches* batches = dynamic_cast<scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
 	scene::CImageOpenGL* imgMTF = new scene::CImageOpenGL(MTF,MTF_count,1,true);
 	batchesPSF->addImage(imgMTF,core::rect<s32>(0,0,Width,Height));
 #endif
 	//release data
+	if(nps1dgraph)
+		delete []nps1dgraph;
 	if(PSF)
 		delete []PSF;
 	if(MTF)

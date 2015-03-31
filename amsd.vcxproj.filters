@@ -43,6 +43,9 @@
     <Filter Include="alglib">
       <UniqueIdentifier>{cd35c363-e8d2-4401-a50d-746b724b8b9a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\io">
+      <UniqueIdentifier>{af4b550a-b57f-4882-9253-cc404c72215b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -294,6 +297,12 @@
     <ClInclude Include="Calculation\NEQ_NPS_Method2.h">
       <Filter>calculation</Filter>
     </ClInclude>
+    <ClInclude Include="Src\IO\CWriteFileW.h">
+      <Filter>Src\io</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\IO\IWriteFile.h">
+      <Filter>Src\io</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="amsd.cpp">
@@ -406,6 +415,9 @@
     </ClCompile>
     <ClCompile Include="Calculation\NEQ_NPS_Method2.cpp">
       <Filter>calculation</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\IO\CWriteFileW.cpp">
+      <Filter>Src\io</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

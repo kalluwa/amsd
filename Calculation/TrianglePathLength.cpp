@@ -13,7 +13,7 @@ namespace Calculation
 //for simplified
 using namespace kk;
 
-void TrianglePathLength(BoxData* data,kk::scene::ISceneManager* scene)
+void TrianglePathLength(BoxData* data,kk::scene::ISceneManager* scene,kk::io::IWriteFile* Output)
 {
 	f32* coronalImage = 0;
 	s32 width =0;
@@ -108,6 +108,10 @@ void TrianglePathLength(BoxData* data,kk::scene::ISceneManager* scene)
 	}
 	for(s32 i=0;i<width;i++)
 		medianValues[i] /=medianValues[index];
+
+	//output 
+	Output->writeString(core::stringc("\n\n指标二:\n路径长度:\n"));
+	Output->writeArraySingle(medianValues,' ');
 #if 1 //draw selected coronal image
 
 	//coronal image

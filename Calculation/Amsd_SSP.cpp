@@ -12,7 +12,7 @@ namespace Calculation
 using namespace kk;
 
 
-void Amsd_SSP_Calculation(BoxData* data,scene::ISceneManager* scene)
+void Amsd_SSP_Calculation(BoxData* data,scene::ISceneManager* scene,kk::io::IWriteFile* Output)
 {
 	// remove head and tail
 	// /\y
@@ -175,6 +175,9 @@ void Amsd_SSP_Calculation(BoxData* data,scene::ISceneManager* scene)
 		//MTF[i] = (MTF[i] - MTF_minValue)*MTF_inverseScale;
 		MTF[i] /=MTF[0];
 	}
+
+	Output->writeString(core::stringc("\n\nÖ¸±êÁù£º\nSSP:\n"));
+	Output->writeArraySingle(MTF,MTF_count,' ');
 #if 1 //Debug
 	kk::scene::ImageBatches* batches = dynamic_cast<kk::scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
 	
