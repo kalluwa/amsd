@@ -133,21 +133,21 @@ BOOL CParametersDlg::OnInitDialog()
 
 	//GetDlgItem(txtOffsetDistanceZ)->SetWindowTextW(L"0");
 	
-	//SizeX = 768;
-	//SizeY = 656;
-	//SizeZ = 126;
+	SizeX = 768;
+	SizeY = 656;
+	SizeZ = 126;
 
-	//DistanceX =1.35;
-	//DistanceY =1.35;
-	//DistanceZ =6.67;
+	DistanceX =1.35;
+	DistanceY =1.35;
+	DistanceZ =6.67;
 
-	SizeX = 640;
-	SizeY = 544;
-	SizeZ = 200;
+	//SizeX = 640;
+	//SizeY = 544;
+	//SizeZ = 200;
 
-	DistanceX =1.2;
-	DistanceY =1.2;
-	DistanceZ =3.3;
+	//DistanceX =1.2;
+	//DistanceY =1.2;
+	//DistanceZ =3.3;
 
 	DistanceOffsetZ = 0;
 	//InverseLoad = false;
@@ -514,8 +514,7 @@ void CamsdView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	event.Key.iskeydown = true;
 	if(nChar==17)
 		keyControl = true;
-	else
-		keyControl = false;
+
 	event.Key.control=keyControl;
 	if(nChar==16)
 		keyShift = true;
