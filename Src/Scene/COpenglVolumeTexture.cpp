@@ -24,14 +24,14 @@ COpenglVolumeTexture::COpenglVolumeTexture(video::IVideoDriver* driver,int _size
 	SelectedBox.MaxEdge = core::vector3di(_sizeX-1,_sizeY-1,_sizeZ-1);
 }
 
-COpenglVolumeTexture::COpenglVolumeTexture(video::IVideoDriver* driver,const char* fileName,int sizeX,int sizeY,int sizeZ,f32 mminx,f32 mminy,f32 mminz,int startSlice)
+COpenglVolumeTexture::COpenglVolumeTexture(video::IVideoDriver* driver,const char* fileName,int sizeX,int sizeY,int sizeZ,f32 mminx,f32 mminy,f32 mminz,int startSlice,bool ZInverseLoad)
 	:IVolumeTexture(driver),SizeX(sizeX),SizeY(sizeY),SizeZ(sizeZ),mmInX(mminx),mmInY(mmInY),mmInZ(mminz),Data(0),DataVisited(0)
 {
 	SelectedBox.MinEdge = core::vector3di(0,0,0);
 	SelectedBox.MaxEdge = core::vector3di(sizeX-1,sizeY-1,sizeZ-1);
 
 	if(strlen(fileName)>0)
-		this->loadVolumeFromFile(fileName,sizeX,sizeY,sizeZ,startSlice);
+		this->loadVolumeFromFile(fileName,sizeX,sizeY,sizeZ,startSlice,ZInverseLoad);
 }
 //deconstructor
 COpenglVolumeTexture::~COpenglVolumeTexture()
@@ -43,7 +43,7 @@ COpenglVolumeTexture::~COpenglVolumeTexture()
 		delete []DataVisited;
 }
 
-void COpenglVolumeTexture::loadVolumeFromFile(const char* fileName,int sizeX,int sizeY,int sizeZ,int startSlice)
+void COpenglVolumeTexture::loadVolumeFromFile(const char* fileName,int sizeX,int sizeY,int sizeZ,int startSlice,bool ZInverseLoad)
 {
 	glEnable(GL_CULL_FACE);
 	glClearColor(0.0, 0.0, 0.0, 0);
@@ -69,7 +69,37 @@ void COpenglVolumeTexture::loadVolumeFromFile(const char* fileName,int sizeX,int
 	long offset = SizeX*SizeY*startSlice*4;//float ->4 bytes
 	fseek(fp,offset,SEEK_SET);
 	//read volume data
-	fread(Data,4,sizeVoxel,fp);
+	if(!ZInverseLoad)
+	{
+		fread(Data,4,sizeVoxel,fp);
+		//f32* dataPtr = Data;
+		//for(s32 z=0;z<sizeZ;z++)
+		//{
+		//	//fseek(fp,((sizeZ-1)-z)*sizeX*sizeY,SEEK_SET);
+		//	//load a slice
+		//	dataPtr+=sizeX*sizeY;
+		//	fread(dataPtr,4,sizeX*sizeY,fp);
+		//}
+	}
+	else
+	{
+		//inverse Z coordinate
+		//for(s32 z=0;z<sizeZ;z++)
+		//{
+		//	fseek(fp,((sizeZ-1)-z)*sizeX*sizeY,SEEK_SET);
+		//	//load a slice
+		//	fread(Data+z*sizeX*sizeY,4,sizeX*sizeY,fp);
+		//}
+		fread(Data,4,sizeVoxel,fp);
+		f32* slice = new f32[SizeX*SizeY];
+		for(s32 i=0,j=SizeZ-1;i<j;i++,j--)
+		{
+			memcpy(slice,Data+i*SizeX*SizeY,SizeX*SizeY*4);
+			memcpy(Data+i*SizeX*SizeY,Data+j*SizeX*SizeY,SizeX*SizeY*4);
+			memcpy(Data+j*SizeX*SizeY,slice,SizeX*SizeY*4);
+		}
+		delete slice;
+	}
 	memcpy(DataShow,Data,sizeVoxel*4);
 	//close file
 	fclose(fp);
@@ -337,7 +367,7 @@ void COpenglVolumeTexture::OnEvent(SEvent event)
 
 
 int count =0;
-core::aabbox3df COpenglVolumeTexture::getPointedData(const core::line3df& line,bool appendBox)
+core::aabbox3df COpenglVolumeTexture::getPointedData(const core::line3df& line,bool appendBox,f32 threshold)
 {
 	core::aabbox3df box;
 

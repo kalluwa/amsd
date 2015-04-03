@@ -59,6 +59,8 @@ BEGIN_MESSAGE_MAP(CamsdView, CView)
 	ON_COMMAND(ID_BUTTON4, &CamsdView::OnNEQCalculation)
 	ON_COMMAND(ID_BUTTON6, &CamsdView::OnMetalUniformity)
 	ON_COMMAND(ID_BUTTON8, &CamsdView::OnAMSD_SSP)
+	ON_WM_HSCROLL()
+	ON_COMMAND(sldPickThreshold, &CamsdView::Onsldpickthreshold)
 END_MESSAGE_MAP()
 
 // CamsdView 构造/析构
@@ -101,6 +103,8 @@ public:
 	s32 SizeX,SizeY,SizeZ;
 	f64 DistanceX,DistanceY,DistanceZ;
 	s32 DistanceOffsetZ;
+	bool InverseZ;
+	CButton CheckButton;
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
 // 实现
@@ -129,15 +133,24 @@ BOOL CParametersDlg::OnInitDialog()
 
 	//GetDlgItem(txtOffsetDistanceZ)->SetWindowTextW(L"0");
 	
-	SizeX = 768;
-	SizeY = 656;
-	SizeZ = 126;
+	//SizeX = 768;
+	//SizeY = 656;
+	//SizeZ = 126;
 
-	DistanceX =1.35;
-	DistanceY =1.35;
-	DistanceZ =6.67;
+	//DistanceX =1.35;
+	//DistanceY =1.35;
+	//DistanceZ =6.67;
+
+	SizeX = 640;
+	SizeY = 544;
+	SizeZ = 200;
+
+	DistanceX =1.2;
+	DistanceY =1.2;
+	DistanceZ =3.3;
 
 	DistanceOffsetZ = 0;
+	//InverseLoad = false;
 	//write initial data to control
 	//reference:http://blog.csdn.net/hfnhzpe/article/details/2474889
 	UpdateData(false);
@@ -149,6 +162,9 @@ void CParametersDlg::OnOK()
 {
 	//get the changed data
 	UpdateData(true);
+	//reference:1 https://msdn.microsoft.com/en-us/library/8tba1y6f(v=vs.100)
+	//2:http://stackoverflow.com/questions/12091887/how-to-see-if-an-mfc-checkbox-is-selected
+	InverseZ=(CheckButton.GetCheck()&BST_CHECKED);
 
 	CDialogEx::OnOK();
 }
@@ -166,6 +182,8 @@ void CParametersDlg::DoDataExchange(CDataExchange* pDX)
 
 	DDX_Text(pDX,txtOffsetDistanceZ,DistanceOffsetZ);
 	
+	DDX_Control(pDX,chkInverseLoad,CheckButton);
+	//DDX_Text(pDX,chkInverseLoad,InverseLoad);
 }
 
 BEGIN_MESSAGE_MAP(CParametersDlg, CDialogEx)
@@ -194,6 +212,7 @@ void CamsdView::OnFileOpen()
 		s32 sizeX,sizeY,sizeZ;
 		f64 mmX,mmY,mmZ;
 		s32 offset;
+		bool zInverse;
 		//get parameters
 		//CAboutDlg aboutDlg;
 		CParametersDlg paramsDlg;
@@ -238,8 +257,9 @@ void CamsdView::OnFileOpen()
 			mmZ = paramsDlg.DistanceZ;
 
 			offset = paramsDlg.DistanceOffsetZ;
+			zInverse = paramsDlg.InverseZ;//(paramsDlg.CheckButton.GetCheck()&BST_CHECKED);
 			glInit();
-			app = new IApp(fileName,sizeX,sizeY,sizeZ,(f32)mmX,(f32)mmY,(f32)mmZ,offset);
+			app = new IApp(fileName,sizeX,sizeY,sizeZ,(f32)mmX,(f32)mmY,(f32)mmZ,offset,zInverse);
 			glResize(Width,Height);
 			//std::cout<<fileName.c_str();
 		}
@@ -382,7 +402,7 @@ int CamsdView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	//memory leaks
-	//_CrtSetBreakAlloc(489);//489为内存泄露块
+	//_CrtSetBreakAlloc(207429);//489为内存泄露块
 	// TODO:  在此添加您专用的创建代码
 	glInit();
 	app = new IApp();
@@ -494,6 +514,8 @@ void CamsdView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	event.Key.iskeydown = true;
 	if(nChar==17)
 		keyControl = true;
+	else
+		keyControl = false;
 	event.Key.control=keyControl;
 	if(nChar==16)
 		keyShift = true;
@@ -729,4 +751,31 @@ void CamsdView::OnAMSD_SSP()
 
 	app->OnEvent(event);
 	updateViewWindow();
+}
+
+
+
+
+void CamsdView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	// ThODO: 在此添加消息处理程序代码和/或调用默认值
+	if(app)
+		app->PickThreshold = 20;
+	CView::OnHScroll(nSBCode, nPos, pScrollBar);
+}
+
+
+void CamsdView::Onsldpickthreshold()
+{
+	// TODO: 在此添加命令处理程序代码
+	//get slider position
+	auto pWnd=(CFrameWndEx *)AfxGetApp()->GetMainWnd();
+	auto ribbonBar = pWnd->GetRibbonBar();
+	
+	CMFCRibbonSlider* pSlider = DYNAMIC_DOWNCAST(CMFCRibbonSlider, ribbonBar->FindByID(sldPickThreshold));
+ 
+	f32 ratio = (pSlider->GetPos()-pSlider->GetRangeMin())/(f32)(pSlider->GetRangeMax()-pSlider->GetRangeMin());
+	f32 threshold = 1.0f*ratio;
+	if(app)
+		app->PickThreshold = threshold;
 }

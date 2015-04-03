@@ -11,7 +11,7 @@
 
 namespace Calculation
 {
-void Amsd_NEQ_NPS_UsingMethod2(BoxData* data,kk::scene::ISceneManager* scene,kk::io::IWriteFile* Output,const core::aabbox3di& adjustedBox)
+void Amsd_NEQ_NPS_UsingMethod2(BoxData* data,kk::scene::ISceneManager* scene,kk::io::IWriteFile* Output,f32 Sout,const core::aabbox3di& adjustedBox)
 {
 	SliceData* MiddleSlice=0;
 //2 NPS
@@ -141,15 +141,17 @@ void Amsd_NEQ_NPS_UsingMethod2(BoxData* data,kk::scene::ISceneManager* scene,kk:
 	//get 1d nps from 2d nps image
 	//eg:xy:1.35 mm/voxel---FFT-->1 voxel-1   =  1 pixel-1
 	//	=  (1.35mm)-1 ==7.4 cm-1
+	//step:0.1pixel   --->10 pixel-1
+	//  --->10/1.35 mm-1---->10/(0.135)cm-1=70.4cm-1
 	// sample step = 0.5 cm-1
 
 	//we use actual stride = 0.1px 
 	core::vector2di centerNPS = core::vector2di(npsAverage->Width/2,npsAverage->Height/2);//npsAverage->getLocalCenter();
-	f32 stride = 0.4f;
+	f32 stride = 0.1f;
 	f32 inverseStride = 1.0f/stride;
 	//##########################unit
-	f32 stepUnit = 1.0f/(0.1f*mmInXY);//7.4 cm-1
-	stepUnit = stepUnit / ((Width - centerNPS.X)/stride);//7.4 /howManySteps cm-1
+	f32 stepUnit = 10.0f/(0.1f*mmInXY);//70.4 cm-1
+	stepUnit = stepUnit / ((Width - centerNPS.X)/stride);//70.4 /howManySteps cm-1
 	//##########################unit
 	s32 NPS_stepCount = (s32)(sqrtf((f32)((Width-centerNPS.X)*(Width-centerNPS.X)+
 			(Height-centerNPS.Y)*(Height-centerNPS.Y)))/stride)+100;
@@ -186,11 +188,11 @@ void Amsd_NEQ_NPS_UsingMethod2(BoxData* data,kk::scene::ISceneManager* scene,kk:
 		nps1dValues[i]/=nps1dValuesCount[i];
 	}
 	//get sample result
-	s32 actualStride = (s32)(0.5f / stepUnit);
-	core::array<f32> sampleValues;
-	for(s32 i = actualStride; i<NPS_stepCount;i+= actualStride)
+	f32 actualStride = (f32)(0.5f / stepUnit);
+	core::array<f32> sampleNPSValues;
+	for(f32 i = actualStride; i<NPS_stepCount;i+= actualStride)
 	{
-		sampleValues.push_back(nps1dValues[i]);
+		sampleNPSValues.push_back(nps1dValues[(s32)i]);
 	}
 
 #if 1 // for debug
@@ -206,10 +208,10 @@ void Amsd_NEQ_NPS_UsingMethod2(BoxData* data,kk::scene::ISceneManager* scene,kk:
 	//debugSlicePos = (data->Box.MinEdge.Z+data->Box.MaxEdge.Z)/2;
 	//data->getSliceZ(sliceImage,debugSlicePos,width,height);
 
-	f32* nps1dgraph = new f32[sampleValues.size()];
-	for(s32 i=0;i<(s32)sampleValues.size();i++)
+	f32* nps1dgraph = new f32[sampleNPSValues.size()];
+	for(s32 i=0;i<(s32)sampleNPSValues.size();i++)
 	{
-		nps1dgraph[i]=sampleValues[i];
+		nps1dgraph[i]=sampleNPSValues[i];
 	}
 	//image batches
 	//scene::ImageBatches* batches = dynamic_cast<scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
@@ -220,7 +222,6 @@ void Amsd_NEQ_NPS_UsingMethod2(BoxData* data,kk::scene::ISceneManager* scene,kk:
 		//delete []sliceImage;
 #endif
 	//clear for nps calculation
-	sampleValues.clear();
 	if(nps1dValues)
 		delete []nps1dValues;
 	if(nps1dValuesCount)
@@ -391,14 +392,37 @@ void Amsd_NEQ_NPS_UsingMethod2(BoxData* data,kk::scene::ISceneManager* scene,kk:
 		//MTF[i] = (MTF[i] - MTF_minValue)*MTF_inverseScale;
 		MTF[i] /= MTF[0];
 	}
+
+	//get 0.5cm-1 MTF result
+	f32 maxMTF_FFT = ERF_step;//0.1 pixel
+	maxMTF_FFT = 1.0f/ERF_step;// 0.1pixel---fft--->10 pixel-1
+	maxMTF_FFT = maxMTF_FFT / volume->getMilimeterInX();//10pixel-1-->(10/1.35) mm-1
+	maxMTF_FFT = 10* maxMTF_FFT;//(10/1.35)mm-1----->(10/0.135) cm-1=70.4cm-1
+	
+	f32 stepMtfStride =0.5/maxMTF_FFT*MTF_count;//0.5cm-1-----------70.4cm-1
+	core::array<f32> sampleMTFValues;
+	for(f32 i=stepMtfStride;i<MTF_count;i+=stepMtfStride)
+	{
+		sampleMTFValues.push_back(MTF[(s32)i]);
+	}
+	core::array<f32> NEQValues;
+	s32 minValidCount = min(sampleNPSValues.size(),sampleMTFValues.size());
+	for(s32 i=0;i<minValidCount;i++)
+	{
+		f32 value = Sout *sampleNPSValues[i]/sampleMTFValues[i];
+		NEQValues.push_back(value);
+	}
+	
 	Output->writeString(core::stringc("\n\n指标四:\nNEQ 方法2(MTF):"));
-	Output->writeArraySingle(MTF,MTF_count,' ');
+	Output->writeArraySingle(NEQValues,' ');
 #ifdef _DEBUG
 	scene::ImageBatches* batches = dynamic_cast<scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
 	scene::CImageOpenGL* imgMTF = new scene::CImageOpenGL(MTF,MTF_count,1,true);
 	batchesPSF->addImage(imgMTF,core::rect<s32>(0,0,Width,Height));
 #endif
 	//release data
+	NEQValues.clear();
+	sampleNPSValues.clear();
 	if(nps1dgraph)
 		delete []nps1dgraph;
 	if(PSF)

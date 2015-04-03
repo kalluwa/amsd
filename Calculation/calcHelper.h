@@ -51,6 +51,7 @@ namespace Calculation
 
 		//mean value
 		f32 getMeanValue() const;
+		f32 getMeanValue(f32 threshold) const;
 
 		//extract slice
 		//sliceNo is absolute position 
@@ -105,15 +106,19 @@ namespace Calculation
 		//weighted center
 		f32 getMinValue();
 		core::vector2di getLocalCenter();
+		core::vector2di getLocalCenterUnit(f32 threshold=0.2f);
 		core::vector2df getLocalCenterF();
 		core::vector3di getAbsoluteCenter();
 		//apply radial hanning window
 		void applyRadialWindow(f32 mmInXY);
 		void resizeImage();
+		//resize image to fit cylinder
+		void resizeImage(f32 radius);
 		//get pixel
 		f32 getPixelValue(s32 x,s32 y);
 		void setPixelValue(s32 x,s32 y,f32 value);
 		f32* Data;
+		BoxData* boxData;
 		s32 Width, Height;
 		core::vector3di BasePos;
 

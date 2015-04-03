@@ -198,6 +198,26 @@ f32 BoxData::getMeanValue() const
 	return sum;
 };
 
+f32 BoxData::getMeanValue(f32 threshold) const
+{
+	f32 sum=0.0f;
+	s32 count = 0;
+	for(int z=Box.MinEdge.Z;z<=Box.MaxEdge.Z;z++)
+	for(int y=Box.MinEdge.Y;y<=Box.MaxEdge.Y;y++)
+	for(int x=Box.MinEdge.X;x<=Box.MaxEdge.X;x++)
+	{
+		if(getValue(x,y,z)>=threshold)
+		{
+			sum += getValue(x,y,z);
+			count++;
+		}
+	}
+	if(count)
+	sum /=count;
+
+	return sum;
+};
+
 //extract slice
 void BoxData::getSliceX(f32*& dataToFill,s32 slicePos,s32& width,s32& height,f32 threshold) const
 {
@@ -359,15 +379,16 @@ SliceData::~SliceData()
 	if(Data)
 		delete []Data;
 }
-SliceData::SliceData(f32* CTData,BoxData* boxData,s32 slicePos)
+SliceData::SliceData(f32* CTData,BoxData* _boxData,s32 slicePos)
 {
-	core::aabbox3di box = boxData->Box;
+	core::aabbox3di box = _boxData->Box;
 
 	Width = box.MaxEdge.X-box.MinEdge.X+1;
 	Height = box.MaxEdge.Y- box.MinEdge.Y+1;
 	Data = 0;//new f32[Width*Height];
 	s32 z= slicePos;
-	boxData->getSliceZ(Data,slicePos,Width,Height);
+	_boxData->getSliceZ(Data,slicePos,Width,Height);
+	boxData = _boxData;
 	//for(s32 x=0;x<Width;x++)
 	//	for(s32 y=0;y<Height;y++)
 	//	{
@@ -377,7 +398,8 @@ SliceData::SliceData(f32* CTData,BoxData* boxData,s32 slicePos)
 	//			(x+box.MinEdge.X)]; 
 	//	}
 
-	BasePos = boxData->Box.MinEdge;
+	BasePos = _boxData->Box.MinEdge;
+	BasePos.Z = slicePos;
 }
 
 bool SliceData::subSlice(SliceData* other)
@@ -439,6 +461,29 @@ core::vector2di SliceData::getLocalCenter()
 	return core::vector2di((s32)xSum,(s32)ySum);
 };
 
+core::vector2di SliceData::getLocalCenterUnit(f32 threshold)
+{
+	f32 xSum=0.0f,ySum=0.0f,nSum=0.0f;
+	for(s32 x=0;x<Width;x++)
+		for(s32 y=0;y<Height;y++)
+		{
+			if(Data[x+y*Width]>threshold)
+			{
+				//xSum += 1*x;
+				//ySum += 1*y;
+				//nSum += 1;
+				xSum += x;
+				ySum += y;
+				nSum +=1;
+			}
+		}
+
+	xSum /= nSum;
+	ySum /= nSum;
+
+	return core::vector2di((s32)xSum,(s32)ySum);
+}
+
 core::vector2df SliceData::getLocalCenterF()
 {
 	
@@ -456,6 +501,43 @@ core::vector2df SliceData::getLocalCenterF()
 	ySum /= nSum;
 
 	return core::vector2df((f32)xSum,(f32)ySum);
+}
+
+void SliceData::resizeImage(f32 radius)
+{
+	radius = (s32)radius;
+	core::vector2di center = getLocalCenter();
+
+	core::vector2di offset = core::vector2di((s32)(center.X-radius),
+		(s32)(center.Y-radius));
+	s32 newWidth = (s32)(2*radius+1);
+	s32 newHeight = (s32)(2*radius+1);
+
+	if(Data)
+		delete []Data;
+	Data = new f32[newWidth*newHeight];
+	core::vector3di leftBottomCorner(BasePos);
+	leftBottomCorner.X = (BasePos.X+center.X) - radius;
+	leftBottomCorner.Y = (BasePos.Y+center.Y) - radius;
+	leftBottomCorner.Z = BasePos.Z;
+
+	for(s32 y=0;y<newHeight;y++)
+	{
+		for(s32 x=0;x<newWidth;x++)
+		{
+			Data[y*newWidth+x] = //Data[(y+offset.Y)*Width+(x+offset.X)];
+				//getValue(leftBottomCorner.X+x,leftBottomCorner.Y+y,leftBottomCorner.Z);
+				boxData->OriginalData[(leftBottomCorner.X+x)+
+				(leftBottomCorner.Y+y)*boxData->SizeX+
+				(leftBottomCorner.Z*boxData->SizeX*boxData->SizeY)];
+		}
+	}
+	Width = newWidth;
+	Height = newHeight;
+	//BasePos.X += offset.X;
+	//BasePos.Y += offset.Y;
+	BasePos = leftBottomCorner;
+
 }
 void SliceData::resizeImage()
 {

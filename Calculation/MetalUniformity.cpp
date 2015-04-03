@@ -24,6 +24,7 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene,k
 {
 //pre process
 //remove extra part shold be done in volumeTexture class
+	
 	//get max voxel count
 	s32 maxValue=0;
 	f32 CTValue_max=0.0f;
@@ -77,34 +78,34 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene,k
 	adjustedBox.MaxEdge.Z = data->Box.MinEdge.Z+realEnd;
 
 	//we use threshold=0.35 to remove volxel which isnot belong to metal
-	f32 thresholdToEliminateActal = 0.35;
+	f32 thresholdToEliminateActal = 0.35f;
 	//then we need to find 4 peaks
 	core::array<s32> Peaks;
-	core::array<f32> BaseLinePoss;
+	core::array<s32> BaseLinePoses;
 	//debug
-	f32 debugValuePeaks;
+	f32 debugValuePeaks=0.0f;
 	for(s32 i = realStart;i<realEnd;i++)
 	{
 		//-1  0   1
 		if(CTSliceMaxCTValues[i]>thresholdToEliminateActal&&
 			CTSliceMaxCTValues[i+1]<thresholdToEliminateActal)
 		{
-			BaseLinePoss.push_back(i);
+			BaseLinePoses.push_back(i);
 		}
 		else//1  0  -1
 		if(CTSliceMaxCTValues[i]<thresholdToEliminateActal&&
 			CTSliceMaxCTValues[i+1]>thresholdToEliminateActal)
 		{
-			BaseLinePoss.push_back(i);
+			BaseLinePoses.push_back(i);
 		}
 	}
-	for(s32 i=0;i<(s32)BaseLinePoss.size();i+=2)
+	for(s32 i=0;i<(s32)BaseLinePoses.size();i+=2)
 	{
 		//find max value in this range
-		f32 maxValue = CTSliceMaxCTValues[BaseLinePoss[i]];
-		s32 rightIndex = BaseLinePoss[i];
-		s32 start = BaseLinePoss[i];
-		s32 end = BaseLinePoss[i+1];
+		f32 maxValue = CTSliceMaxCTValues[BaseLinePoses[i]];
+		s32 rightIndex = BaseLinePoses[i];
+		s32 start = BaseLinePoses[i];
+		s32 end = BaseLinePoses[i+1];
 		for(s32 x=start;x<end;x++)
 			if(CTSliceMaxCTValues[x] > maxValue)
 			{
@@ -112,21 +113,36 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene,k
 				maxValue = CTSliceMaxCTValues[x];
 			}
 		Peaks.push_back(rightIndex);
+		if((s32)Peaks.size()>=4)
+		{
+			realEnd = end+2;
+			break;
+		}
 	}
 	
-	//now we got peaks
-
-	if((s32)Peaks.size()!=4)
+	f32* drawCTValues1 = new f32[realEnd-realStart];
+	for(s32 i=realStart;i<realEnd;i++)
 	{
-		::MessageBoxA(NULL,"Not Found 4 Metal!","error",0);
-		throw "Not Found 4 Metal!";
-	}//	
+		drawCTValues1[i-realStart] = CTSliceMaxCTValues[i];
+	}
+	//image batches
+	scene::ImageBatches* batches1 = dynamic_cast<scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
+	scene::CImageOpenGL* img1 = new scene::CImageOpenGL(drawCTValues1,realEnd-realStart,1,false);
+	batches1->addImage(img1,core::rect<s32>(100,0,realEnd-realStart,100));
+	delete []drawCTValues1;
+	//return adjustedBox;
+	//now we got peaks
+	if((s32)Peaks.size()<4)
+	{
+		::MessageBoxA(NULL,"没有找到4个金属带!请关闭程序","error",0);
+		return adjustedBox;
+	}
 
 	s32 AluminumSlicePos = Peaks[0] + data->Box.MinEdge.Z;
 	//add control region
 	f32 minValue = 100.0f;
 	s32 minActalIndex = -1;
-	for(s32 i=BaseLinePoss[BaseLinePoss.size()-1];i<realEnd;i++)
+	for(s32 i=BaseLinePoses[BaseLinePoses.size()-1];i<realEnd;i++)
 	{
 		if(minValue > CTSliceMaxCTValues[i])
 		{
@@ -366,12 +382,10 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene,k
 		delete controlSliceData;
 //########################################
 	//w pin
-	s32 wuPinStart=-1,wuPinEnd=-1;
+	/*s32 wuPinStart=-1,wuPinEnd=-1;
 	for(s32 i=realEnd;i<(s32)passedVoxelCount.size();i++)
 	{
 		f32 sliceMaxValue = data->getSliceZMaxValue(data->Box.MinEdge.Z+i);
-		//f32 maxValue,minvalue;
-		//s32 count = data->getSliceZPassVoxelCount(data->Box.MinEdge.Z+i,maxValue,minvalue,6.0f);
 		if(sliceMaxValue>6.0f)
 		{
 			if(wuPinStart == -1)
@@ -386,13 +400,41 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene,k
 			break;
 		}
 	}
+	if(wuPinStart==-1 ||wuPinEnd==-1)
+	{
+		MessageBoxA(NULL,"没有找到钨","error",0);
+		return adjustedBox;
+	}
 	s32 testWuPinSlice = data->Box.MinEdge.Z+(wuPinStart + wuPinEnd)/2;
+	
 	SliceData* wuSliceData = new SliceData(data->OriginalData,data,testWuPinSlice);
+	*/
+	f32 maxValueWu=0.0f;
+	s32 wuIndex=0;
+	for(s32 i=realEnd;i<(s32)passedVoxelCount.size();i++)
+	{
+		f32 sliceMaxValue = data->getSliceZMaxValue(data->Box.MinEdge.Z+i);
+		if(sliceMaxValue > maxValueWu)
+		{
+			maxValueWu = sliceMaxValue;
+			wuIndex = data->Box.MinEdge.Z+i;
+		}
+	}
+	SliceData* wuSliceData = new SliceData(data->OriginalData,data,wuIndex);
+
+
 	core::vector2di centerWuPinSlice = wuSliceData->getLocalCenter();
 	s32 WuPinWidth = wuSliceData->Width;
 	s32 WuPinHeight = wuSliceData->Height;
+	
+	//image batches
+	scene::ImageBatches* batches2 = dynamic_cast<scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
+	scene::CImageOpenGL* img2 = new scene::CImageOpenGL(wuSliceData->Data,wuSliceData->Width,wuSliceData->Height,false);
+	batches2->addImage(img2,core::rect<s32>(0,0,100,100));
+	//return adjustedBox;
+
 	//threshold for wu pin
-	f32 wuThreshold = 6.0f;
+	f32 wuThreshold = maxValueWu*0.5f;//6.0f;
 	//mask and array
 	bool* wuPinMask = new bool[wuSliceData->Width*wuSliceData->Height];
 #define VisitMask(_u,_v) wuPinMask[wuSliceData->Width*(_v)+(_u)] = 1
@@ -491,7 +533,7 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene,k
 	}
 
 	f32 ratio = (WuMiddlePoints[maxIndex_middle].Y-WuMiddlePoints[minIndex_middle].Y)/(f32)(WuMiddlePoints[maxIndex_middle].X-WuMiddlePoints[minIndex_middle].X);
-	for(f32 x=WuMiddlePoints[minIndex_middle].X;x<WuMiddlePoints[maxIndex_middle].X;x+=1)
+	for(f32 x=(f32)WuMiddlePoints[minIndex_middle].X;x<WuMiddlePoints[maxIndex_middle].X;x+=1)
 	{
 		s32 xPos = (s32)x;
 		s32 yPos = (s32)(WuMiddlePoints[minIndex_middle].Y+(x-WuMiddlePoints[minIndex_middle].X)*ratio);
@@ -508,7 +550,7 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene,k
 	}
 
 	ratio = (WuMiddlePoints[maxIndex_middle].Y-WuMiddlePoints[minIndex_middle].Y)/(f32)(WuMiddlePoints[maxIndex_middle].X-WuMiddlePoints[minIndex_middle].X);
-	for(f32 x=WuMiddlePoints[minIndex_middle].X;x<WuMiddlePoints[maxIndex_middle].X;x+=1)
+	for(f32 x=(f32)WuMiddlePoints[minIndex_middle].X;x<WuMiddlePoints[maxIndex_middle].X;x+=1)
 	{
 		s32 xPos = (s32)x;
 		s32 yPos = (s32)(WuMiddlePoints[minIndex_middle].Y+(x-WuMiddlePoints[minIndex_middle].X)*ratio);
@@ -616,7 +658,7 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene,k
 	//image batches
 	scene::ImageBatches* batches = dynamic_cast<scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
 	scene::CImageOpenGL* img = new scene::CImageOpenGL(sliceImage,width,height,false);
-	batches->addImage(img,core::rect<s32>(0,0,width,height));
+	batches->addImage(img,core::rect<s32>(0,100,width,100+height));
 	/*scene::ImageBatches* batches = dynamic_cast<scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
 	scene::CImageOpenGL* img = new scene::CImageOpenGL(drawCTValues,realEnd-realStart,1,false);
 	batches->addImage(img,core::rect<s32>(0,0,width,height));*/
@@ -627,7 +669,7 @@ core::aabbox3di Amsd_MetalUniformity(BoxData* data,scene::ISceneManager* scene,k
 		delete [] drawCTValues;
 #endif
 	passedVoxelCount.clear();
-	BaseLinePoss.clear();
+	BaseLinePoses.clear();
 	CTSliceMaxCTValues.clear();
 	Peaks.clear();
 	if(wuSliceData)

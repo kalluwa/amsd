@@ -23,7 +23,7 @@ using namespace Calculation;
 //test ray
 core::line3df line;
 core::aabbox3df mainBox(-0.5f,-0.5f,-0.5f,0.5f,0.5f,0.5f);
-core::aabbox3df pickBox(-1,-1,-1,0,0,0);
+core::aabbox3df pickBox(0,0,0,0.01f,0.01f,0.01f);
 core::vector3df intersectionPoint;
 
 kk::scene::IVolumeTexture* volumeTexture;	
@@ -71,10 +71,10 @@ io::IWriteFile* Output;
 
 		//volume node
 		//core::stringc fileName("F:\\CT\\N42.45.rcn");
-		////<<- image is too large for my videocard-> result in showing nothing ->>
-		//// 756*656*252*4bytes = 484.3125MB and my video card memory is 492MB
+		//<<- image is too large for my videocard-> result in showing nothing ->>
+		// 756*656*252*4bytes = 484.3125MB and my video card memory is 492MB
 		//volumeTexture = new kk::scene::COpenglVolumeTexture(driver,
-		//	//"F:\\CT\\data\\N42.45_A.raw",640,544,240,1.2f,1.2f,3.333f);//288 error
+			//"F:\\CT\\data\\N42.45_A.raw",640,544,240,1.2f,1.2f,3.333f);//288 error
 		//	fileName.c_str(),768,656,126,1.35f,1.35f,6.67f,126);//,125);//125
 		//scene->addNodeToRender(volumeTexture);
 
@@ -107,7 +107,7 @@ io::IWriteFile* Output;
 	}
 
 	IApp::IApp(const kk::core::stringc& fileName,s32 sizeX,s32 sizeY,s32 sizeZ,
-		f32 mmX,f32 mmY,f32 mmZ,s32 offset,kk::video::EDriverType type)
+		f32 mmX,f32 mmY,f32 mmZ,s32 offset,bool inverseLoad,kk::video::EDriverType type)
 		:driver(0),scene(0)
 	{
 
@@ -131,7 +131,7 @@ io::IWriteFile* Output;
 		// 756*656*252*4bytes = 484.3125MB and my video card memory is 492MB
 		volumeTexture = new kk::scene::COpenglVolumeTexture(driver,
 			//"F:\\CT\\data\\N42.45_A.raw",640,544,240,1.2f,1.2f,3.333f);//288 error
-			fileName.c_str(),sizeX,sizeY,sizeZ,mmX,mmY,mmZ,offset);//,125);//125
+			fileName.c_str(),sizeX,sizeY,sizeZ,mmX,mmY,mmZ,offset,inverseLoad);//,125);//125
 		scene->addNodeToRender(volumeTexture);
 
 		scene::ImageBatches* batches = new scene::ImageBatches(driver);
@@ -186,6 +186,9 @@ io::IWriteFile* Output;
 	}
 	void IApp::init()
 	{
+		//
+		PickThreshold = 0.2f;
+
 		scene = new kk::scene::CSceneManager();
 		scene->initEnvironment();
 
@@ -241,7 +244,7 @@ io::IWriteFile* Output;
 		{
 		case ET_KEY:
 			keyCtrl = event.Key.control;
-
+			
 			//debug slice
 			viewSliceZ(event.Key.keycode);
 
@@ -263,11 +266,11 @@ io::IWriteFile* Output;
 					//add box
 					if(keyCtrl)
 					{
-						pickBox.addInternalBox(volumeTexture->getPointedData(line,true));
+						pickBox.addInternalBox(volumeTexture->getPointedData(line,true,PickThreshold));
 						//update volume selected box
 					}
 					else
-						pickBox = volumeTexture->getPointedData(line);
+						pickBox = volumeTexture->getPointedData(line,false,PickThreshold);
 				}
 				
 			}
@@ -368,7 +371,13 @@ io::IWriteFile* Output;
 				Calculation::debugSlicePos++;
 				needUpdate = true;
 				break;
+			case 'O':
+				keyCtrl = false;
+				break;
 			}
+		char debugSliceIndexStr[20];
+		sprintf_s(debugSliceIndexStr,20,"debugPos=%i#",Calculation::debugSlicePos);
+		::OutputDebugStringA(debugSliceIndexStr);
 		if(!needUpdate)
 			return ;
 		Calculation::BoxData* boxData =new BoxData(volumeTexture->getVolumeData(),volumeTexture->getVolumeSizeX(),

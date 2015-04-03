@@ -23,17 +23,17 @@ public:
 	COpenglVolumeTexture(video::IVideoDriver* driver,int sizeX,int sizeY,int sizeZ);
 
 //create a volumeTexture from file
-	COpenglVolumeTexture(video::IVideoDriver* driver,const char* fileName,int sizeX,int sizeY,int sizeZ,f32 mmInX,f32 mmInY,f32 mmInZ,int startSlice = 0);
+	COpenglVolumeTexture(video::IVideoDriver* driver,const char* fileName,int sizeX,int sizeY,int sizeZ,f32 mmInX,f32 mmInY,f32 mmInZ,int startSlice = 0,bool ZInverseLoad=false);
 //deconstructor
 	virtual ~COpenglVolumeTexture();
 //load volume 
-	virtual void loadVolumeFromFile(const char* fileName,int sizeX,int sizeY,int sizeZ,int startSlice=0);
+	virtual void loadVolumeFromFile(const char* fileName,int sizeX,int sizeY,int sizeZ,int startSlice=0,bool ZInverseLoad=false);
 //set render state
 	virtual void setRenderState();
 //render
 	virtual void render();
 //get pointed data
-	virtual core::aabbox3df getPointedData(const core::line3df& ray,bool appendBox);
+	virtual core::aabbox3df getPointedData(const core::line3df& ray,bool appendBox,f32 threshold);
 //get volume data
 	virtual f32* getVolumeData();
 //get volume size

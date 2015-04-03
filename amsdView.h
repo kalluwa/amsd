@@ -105,6 +105,8 @@ public:
 	afx_msg void OnNEQCalculation();
 	afx_msg void OnMetalUniformity();
 	afx_msg void OnAMSD_SSP();
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void Onsldpickthreshold();
 };
 
 #ifndef _DEBUG  // amsdView.cpp 中的调试版本

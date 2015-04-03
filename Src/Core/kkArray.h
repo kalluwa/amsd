@@ -472,7 +472,8 @@ public:
 		
 		u32 i;
 		for (i=index; i<index+count; ++i)
-			allocator.destruct(&data[i]);
+			//allocator.destruct(&data[i]);
+			delete data[i];
 
 		for (i=index+count; i<used; ++i)
 		{

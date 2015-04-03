@@ -24,13 +24,13 @@ public:
 
 	virtual ~IVolumeTexture(){}
 //load volume data
-	virtual void loadVolumeFromFile(const char* fileName,int sizeX,int sizeY,int sizeZ,int startSlice)=0;
+	virtual void loadVolumeFromFile(const char* fileName,int sizeX,int sizeY,int sizeZ,int startSlice,bool ZInverse)=0;
 //set Driver States before rendering[we should close opengl light before rendering]
 	virtual void setRenderState() = 0;
 //render volume data to screen
 	//virtual void render()=0;
 //get pointed data
-	virtual core::aabbox3df getPointedData(const core::line3df& ray,bool appendBox=false)=0;
+	virtual core::aabbox3df getPointedData(const core::line3df& ray,bool appendBox=false,f32 threshold=0.2f)=0;
 
 	virtual f32* getVolumeData()=0;
 

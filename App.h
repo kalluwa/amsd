@@ -24,7 +24,7 @@ public:
 	IApp(kk::video::EDriverType type=video::EDT_OPENGL);
 
 	IApp(const kk::core::stringc& fileName,s32 sizeX,s32 sizeY,s32 sizeZ,
-		f32 mmX,f32 mmY,f32 mmZ,s32 offset,kk::video::EDriverType type= video::EDT_OPENGL);
+		f32 mmX,f32 mmY,f32 mmZ,s32 offset,bool inverseLoad=false,kk::video::EDriverType type= video::EDT_OPENGL);
 	//deconstructor
 	virtual ~IApp();
 
@@ -45,11 +45,13 @@ public:
 	{
 		return driver;
 	}
-	
+public:
+	f32 PickThreshold;
 
 protected:
 	kk::video::IVideoDriver* driver;
 	kk::scene::ISceneManager* scene;
+
 
 };//end class
 

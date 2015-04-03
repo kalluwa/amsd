@@ -9,6 +9,6 @@
 
 namespace Calculation
 {
-	extern void Amsd_NEQ_NPS_UsingMethod2(BoxData* data,kk::scene::ISceneManager* scene,kk::io::IWriteFile* Output,const core::aabbox3di& adjustedBox);
+	extern void Amsd_NEQ_NPS_UsingMethod2(BoxData* data,kk::scene::ISceneManager* scene,kk::io::IWriteFile* Output,f32 Sout,const core::aabbox3di& adjustedBox);
 }
 #endif

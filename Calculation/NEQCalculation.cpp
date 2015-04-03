@@ -96,27 +96,44 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene,kk
 #if 1
 //1 for Sout Calculation
 //Sout is average CT Value of the object
+	s32 testSliceStart = adjustedBox.MinEdge.Z+3;
+	s32 testSliceEnd = adjustedBox.MaxEdge.Z-3;
+
+	f32 Sout = data->getMeanValue(0.2f);
 #endif
 
 
 	//###########################################
 	//using NPS method 2
-	Amsd_NEQ_NPS_UsingMethod2(data,scene,Output,adjustedBox);
+	Amsd_NEQ_NPS_UsingMethod2(data,scene,Output,Sout,adjustedBox);
 	//###########################################
-
+	kk::scene::IVolumeTexture* volume = dynamic_cast<kk::scene::IVolumeTexture*>(scene->getSpecificNodeById("IVolumeTexture"));
+	
 	SliceData* MiddleSlice=0;
 //2 NPS
 #if 1
 	//get 32 paired images and get differences
 	core::array<SliceData*> slices;
 	s32 middleSliceIndex = (adjustedBox.MinEdge.Z + adjustedBox.MaxEdge.Z)/2;
-	for(s32 i=adjustedBox.MinEdge.Z+3;i<adjustedBox.MaxEdge.Z-3;i+=2)
+	//diameter is 148mm while i offset 5 to include all cylinder voxel
+	f32 cylinderRadius = 148/2/volume->getMilimeterInX()+5;
+	for(s32 i=testSliceStart;i<testSliceEnd;i+=2)
 	{
+		//SliceData* slice1=new SliceData(data->OriginalData,data,i);
+		//SliceData* slice2=new SliceData(data->OriginalData,data,i+1);
+
+		//slice1->subSlice(slice2);
+		//slice1->resizeImage();
+		//delete slice2;
+		//slices.push_back(slice1);
+		
+		//my method
 		SliceData* slice1=new SliceData(data->OriginalData,data,i);
+		slice1->resizeImage(cylinderRadius);
 		SliceData* slice2=new SliceData(data->OriginalData,data,i+1);
+		slice2->resizeImage(cylinderRadius);
 
 		slice1->subSlice(slice2);
-		slice1->resizeImage();
 		delete slice2;
 		slices.push_back(slice1);
 
@@ -126,7 +143,7 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene,kk
 			if(MiddleSlice)
 				delete MiddleSlice;
 			MiddleSlice = new SliceData(data->OriginalData,data,i);
-			MiddleSlice->resizeImage();
+			MiddleSlice->resizeImage(cylinderRadius);
 		}
 		else if(i+1 == middleSliceIndex)
 		{
@@ -135,21 +152,24 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene,kk
 				delete MiddleSlice;
 			middleSliceIndex = i+1;
 			MiddleSlice = new SliceData(data->OriginalData,data,i+1);
-			MiddleSlice->resizeImage();
+			MiddleSlice->resizeImage(cylinderRadius);
 		}
 	}
 
 
 	Width = slices[0]->Width;
 	Height = slices[0]->Height;
-
+	//scene::ImageBatches* batches1 = dynamic_cast<scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
+	//scene::CImageOpenGL* img1 = new scene::CImageOpenGL(slices[0]->Data,slices[0]->Width,slices[0]->Height,true);
+	//batches1->addImage(img1,core::rect<s32>(0,0,slices[0]->Width,slices[0]->Height));
+	//
+	//return adjustedBox;
 	//#####################################################
 	//perform CT Value Consistency
 	CTValueConsistencyResult consistency_result= Amsd_CTValueConsistency(data,scene,Output,slices);
 	//#####################################################
 	//apply radial window
 	//scene::IVolumeTexture* volume = dynamic_cast<scene::IVolumeTexture>(scene->getSpecificNodeById("IVolumeTexture"));
-	kk::scene::IVolumeTexture* volume = dynamic_cast<kk::scene::IVolumeTexture*>(scene->getSpecificNodeById("IVolumeTexture"));
 	//TODO: requirement: must mmX == mmY
 	f32 mmInXY = volume->getMilimeterInX();
 	for(s32 i=0;i<(s32)slices.size();i++)
@@ -173,7 +193,9 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene,kk
 		//debug
 		if(sliceForAmplitude->getMinValue()<0.0f)
 		{
-			throw "切片大小不一致";
+			MessageBoxA(NULL,"切片大小不一致，请重启程序","ERROR",0);
+			return adjustedBox;
+			//throw "切片大小不一致";
 		}
 		squareAmplitudes.push_back(sliceForAmplitude);
 	}
@@ -217,6 +239,7 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene,kk
 	//get 1d nps from 2d nps image
 	//eg:xy:1.35 mm/voxel---FFT-->1 voxel-1   =  1 pixel-1
 	//	=  (1.35mm)-1 ==7.4 cm-1
+	//0.1pixel---fft-->10 pixel-1--->70.4cm-1
 	// sample step = 0.5 cm-1
 
 	//we use actual stride = 0.1px 
@@ -224,8 +247,8 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene,kk
 	f32 stride = 0.4f;
 	f32 inverseStride = 1.0f/stride;
 	//##########################unit
-	f32 stepUnit = 1.0f/(0.1f*mmInXY);//7.4 cm-1
-	stepUnit = stepUnit / ((Width - centerNPS.X)/stride);//7.4 /howManySteps cm-1
+	f32 stepUnit = 10.0f/(0.1f*mmInXY);//7.4 cm-1
+	stepUnit = stepUnit / ((Width - centerNPS.X)/stride);//70.4 /howManySteps cm-1
 	//##########################unit
 	s32 NPS_stepCount = (s32)(sqrtf((f32)((Width-centerNPS.X)*(Width-centerNPS.X)+
 			(Height-centerNPS.Y)*(Height-centerNPS.Y)))/stride)+100;
@@ -262,11 +285,11 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene,kk
 		nps1dValues[i]/=nps1dValuesCount[i];
 	}
 	//get sample result
-	s32 actualStride = (s32)(0.5f / stepUnit);
-	core::array<f32> sampleValues;
-	for(s32 i = actualStride; i<NPS_stepCount;i+= actualStride)
+	f32 actualStride = (f32)(0.5f / stepUnit);//0.5cm-1------70.4cm-1
+	core::array<f32> sampleNPSValues;
+	for(f32 i = actualStride; i<NPS_stepCount;i+= actualStride)
 	{
-		sampleValues.push_back(nps1dValues[i]);
+		sampleNPSValues.push_back(nps1dValues[(s32)i]);
 	}
 
 #if 1 // for debug
@@ -282,21 +305,23 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene,kk
 	//debugSlicePos = (data->Box.MinEdge.Z+data->Box.MaxEdge.Z)/2;
 	//data->getSliceZ(sliceImage,debugSlicePos,width,height);
 
-	f32* nps1dgraph = new f32[sampleValues.size()];
-	for(s32 i=0;i<(s32)sampleValues.size();i++)
+	f32* nps1dgraph = new f32[sampleNPSValues.size()];
+	for(s32 i=0;i<(s32)sampleNPSValues.size();i++)
 	{
-		nps1dgraph[i]=sampleValues[i];
+		nps1dgraph[i]=sampleNPSValues[i];
 	}
 	//image batches
 	//scene::ImageBatches* batches = dynamic_cast<scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
 	//scene::CImageOpenGL* img = new scene::CImageOpenGL(nps1dgraph,sampleValues.size(),1,true);
 	//batches->addImage(img,core::rect<s32>(0,0,Width,Height));
 
+	if(nps1dgraph)
+		delete []nps1dgraph;
 	//if(sliceImage)
 		//delete []sliceImage;
 #endif
 	//clear for nps calculation
-	sampleValues.clear();
+	
 	if(nps1dValues)
 		delete []nps1dValues;
 	if(nps1dValuesCount)
@@ -467,15 +492,37 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene,kk
 		//MTF[i] = (MTF[i] - MTF_minValue)*MTF_inverseScale;
 		MTF[i] /= MTF[0];
 	}
-	Output->writeString(core::stringc("\n\n指标四:\nNEQ:"));
-	Output->writeArraySingle(MTF,MTF_count,' ');
+
+	//get 0.5cm-1 MTF result
+	f32 maxMTF_FFT = ERF_step;//0.1 pixel
+	maxMTF_FFT = 1.0f/ERF_step;// 0.1pixel---fft--->10 pixel-1
+	maxMTF_FFT = maxMTF_FFT / volume->getMilimeterInX();//10pixel-1-->(10/1.35) mm-1
+	maxMTF_FFT = 10* maxMTF_FFT;//(10/1.35)mm-1----->(10/0.135) cm-1=70.4cm-1
+	
+	f32 stepMtfStride = 0.5/maxMTF_FFT;//0.5cm-1-----------70.4cm-1
+	core::array<f32> sampleMTFValues;
+	for(f32 i=stepMtfStride;i<MTF_count;i+=stepMtfStride)
+	{
+		sampleMTFValues.push_back(MTF[(s32)i]);
+	}
+	core::array<f32> NEQValues;
+	s32 minValidCount = min(sampleNPSValues.size(),sampleMTFValues.size());
+	for(s32 i=0;i<minValidCount;i++)
+	{
+		f32 value = Sout *sampleNPSValues[i]/sampleMTFValues[i];
+		NEQValues.push_back(value);
+	}
+	Output->writeString(core::stringc("\n\n指标四:\nNEQ(Method 1):"));
+	Output->writeArraySingle(NEQValues,' ');
 #ifdef _DEBUG
 	scene::ImageBatches* batches = dynamic_cast<scene::ImageBatches*>(scene->getSpecificNodeById("ImageBatches"));
 	scene::CImageOpenGL* imgMTF = new scene::CImageOpenGL(MTF,MTF_count,1,true);
 	batchesPSF->addImage(imgMTF,core::rect<s32>(0,0,Width,Height));
 #endif
 	//release data
-	
+	NEQValues.clear();
+	sampleNPSValues.clear();
+	sampleMTFValues.clear();
 	if(MiddleSlice)
 		delete MiddleSlice;
 	if(PSF)
@@ -488,8 +535,6 @@ core::aabbox3di Amsd_NEQCalculation(BoxData* data,scene::ISceneManager* scene,kk
 		delete[] ERF_array_count;
 	if(ERF_array)
 		delete[] ERF_array;
-	
-
 return adjustedBox;
 }
 }
